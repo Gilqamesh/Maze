@@ -1,14 +1,20 @@
 #include "maze.h"
 
-static inline void maze__add_step(struct maze* self) {
+static inline void _maze_add_step(struct maze* self) {
 }
 
-bool maze__create(struct maze* self, struct v2u32 dims, struct v2u32 start, struct v2u32 end) {
+static inline void _maze_set_entry(struct maze* self, struct v2u32 p, enum maze_entry new_entry) {
+    self->data[p.y * self->dims.x + p.x] = (char) new_entry;
+}
+
+bool maze__create(struct maze* self, struct v2u32 dims, struct v2u32 start, struct v2u32 end, u32 seed) {
     self->start            = start;
     self->end              = end;
     self->build_steps.dims = dims;
     self->build_steps.fill = 0;
     self->build_step_count = 0;
+    self->seed             = seed;
+    self->is_finished      = false;
 
     self->dims = v2u32(2 * dims.x + 1, 2 * dims.y + 1);
     self->data = (char*) calloc(self->dims.x * self->dims.y, sizeof(*self->data));
@@ -43,14 +49,79 @@ void maze__destroy(struct maze* self) {
     }
 }
 
+enum maze_direction {
+    MAZE_DIRECTION_UP,
+    MAZE_DIRECTION_LEFT,
+    MAZE_DIRECTION_RIGHT,
+    MAZE_DIRECTION_DOWN,
+};
+
+void _maze_dig(struct maze* self, struct v2u32 p) {
+    if (p.x >= self->dims.x || p.y >= self->dims.y) {
+        return ;
+    }
+
+    _maze_set_entry(self, p, MAZE_ENTRY_ROOM);
+
+    enum maze_direction directions_to_try[4] = {
+        MAZE_DIRECTION_UP,
+        MAZE_DIRECTION_LEFT,
+        MAZE_DIRECTION_RIGHT,
+        MAZE_DIRECTION_DOWN
+    };
+
+    // shuffle directions
+    for (i32 direction_to_try_index = ARRAY_SIZE(directions_to_try) - 1; direction_to_try_index >= 0; --direction_to_try_index) {
+        u32 r = rand() % (direction_to_try_index + 1);
+        enum maze_direction tmp = directions_to_try[direction_to_try_index];
+        directions_to_try[direction_to_try_index] = directions_to_try[r];
+        directions_to_try[r] = tmp;
+    }
+
+    for (u32 direction_to_try_index = 0; direction_to_try_index < ARRAY_SIZE(directions_to_try); ++direction_to_try_index) {
+        // if valid, go there and dig along the way
+        switch (directions_to_try[direction_to_try_index]) {
+            case MAZE_DIRECTION_UP: {
+                if (p.y >= 2 && maze__get_entry(self, v2u32(p.x, p.y - 2)) == MAZE_ENTRY_WALL) {
+                    _maze_set_entry(self, v2u32(p.x, p.y - 1), MAZE_ENTRY_ROOM);
+                    _maze_dig(self, v2u32(p.x, p.y - 2));
+                }
+            } break ;
+            case MAZE_DIRECTION_LEFT: {
+                if (p.x >= 2 && maze__get_entry(self, v2u32(p.x - 2, p.y)) == MAZE_ENTRY_WALL) {
+                    _maze_set_entry(self, v2u32(p.x - 1, p.y), MAZE_ENTRY_ROOM);
+                    _maze_dig(self, v2u32(p.x - 2, p.y));
+                }
+            } break ;
+            case MAZE_DIRECTION_DOWN: {
+                if (p.y < self->dims.y - 2 && maze__get_entry(self, v2u32(p.x, p.y + 2)) == MAZE_ENTRY_WALL) {
+                    _maze_set_entry(self, v2u32(p.x, p.y + 1), MAZE_ENTRY_ROOM);
+                    _maze_dig(self, v2u32(p.x, p.y + 2));
+                }
+            } break ;
+            case MAZE_DIRECTION_RIGHT: {
+                if (p.x < self->dims.x - 2 && maze__get_entry(self, v2u32(p.x + 2, p.y)) == MAZE_ENTRY_WALL) {
+                    _maze_set_entry(self, v2u32(p.x + 1, p.y), MAZE_ENTRY_ROOM);
+                    _maze_dig(self, v2u32(p.x + 2, p.y));
+                }
+            } break ;
+        }
+    }
+}
+
 void maze__build(struct maze* self) {
     if (maze__is_finished(self)) {
         return ;
     }
+
+    srand(self->seed);
+    _maze_dig(self, self->start);
+
+    self->is_finished = true;
 }
 
-enum maze_entry maze__get_entry(struct maze* self, u32 row, u32 col) {
-    return (enum maze_entry) self->data[row * self->dims.x + col];
+enum maze_entry maze__get_entry(struct maze* self, struct v2u32 p) {
+    return (enum maze_entry) self->data[p.y * self->dims.x + p.x];
 }
 
 void maze__build_advance(struct maze* self) {

@@ -25,10 +25,10 @@ void bit_buffer__destroy(struct bit_buffer* self) {
     }
 }
 
-void bit_buffer__blit_to_window(struct bit_buffer* self, RECT client_rect, HDC window_device_context_handle) {
+void bit_buffer__blit_to_window(struct bit_buffer* self, struct window* window, HDC window_device_context_handle) {
     StretchDIBits(
         window_device_context_handle,
-        0, 0, client_rect.right - client_rect.left, client_rect.bottom - client_rect.top,
+        0, 0, window->dims.x, window->dims.y,
         0, 0, self->dims.x, self->dims.y,
         self->buffer, &self->info,
         DIB_RGB_COLORS, SRCCOPY

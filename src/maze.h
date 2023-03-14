@@ -15,12 +15,17 @@ struct maze_build_steps { // stores each step of the build process
 };
 
 /*
+    x - col
+    y - row
+*/
+
+/*
     Example: 4x3 maze, every second position is a room
     x x x x x x x x x
     x o x o x o x o x
-    x x x x x x x o x
+    x x x x x x x x x
     x o x o x o x o x
-    x x x x x x x o x
+    x x x x x x x x x
     x o x o x o x o x
     x x x x x x x x x
 */
@@ -35,15 +40,17 @@ struct maze {
     struct maze_build_steps  build_steps;
     u32                      build_step_count;
 
+    u32                      seed; // TODO(david): implement a stateful random number generator
+
     bool                     is_finished;
 };
 
-bool maze__create(struct maze* self, struct v2u32 dims, struct v2u32 start, struct v2u32 end);
+bool maze__create(struct maze* self, struct v2u32 dims, struct v2u32 start, struct v2u32 end, u32 seed);
 void maze__destroy(struct maze* self);
 
 void maze__build(struct maze* self);
 
-enum maze_entry maze__get_entry(struct maze* self, u32 row, u32 col);
+enum maze_entry maze__get_entry(struct maze* self, struct v2u32 p);
 
 // @brief advance the build process by one (purely for animation purposes)
 void maze__build_advance(struct maze* self);

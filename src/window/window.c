@@ -13,6 +13,7 @@ void window__deinit_module(struct window* self) {
 
 bool window__create(struct window* self, HINSTANCE app_handle, const char* window_name, struct v2u32 window_pos, struct v2u32 window_dims) {
     self->destroy_next_frame = false;
+    self->dims               = window_dims;
 
     if (bit_buffer__create(&self->frame_buffer, window_dims) == false) {
         return false;
@@ -113,17 +114,12 @@ void window__poll_inputs(struct window* self) {
 }
 
 void window__end_draw(struct window* self) {
-    RECT client_rect;
-    if (GetClientRect(self->window_handle, &client_rect) == 0) {
-        console__fatal(self->console, "in 'window__end_draw': GetClientRect failed, GetLastError = %d\n", GetLastError());
-    }
-
     HDC window_device_context_handle = GetDC(self->window_handle);
     if (window_device_context_handle == NULL) {
         console__fatal(self->console, "in 'window__end_draw': GetDC failed\n");
     }
 
-    bit_buffer__blit_to_window(&self->frame_buffer, client_rect, window_device_context_handle);
+    bit_buffer__blit_to_window(&self->frame_buffer, self, window_device_context_handle);
 
     ReleaseDC(self->window_handle, window_device_context_handle);
 
