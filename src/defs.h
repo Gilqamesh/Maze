@@ -24,5 +24,6 @@ typedef double r64;
 #define ARRAY_SIZE(array) (sizeof(array)/sizeof((array)[0]))
 
 enum APP_ERROR {
-    APP_ERROR_WINDOW_CALLBACK
+    APP_ERROR_WINDOW_CALLBACK,
+    APP_ERROR_WM_CREATE
 };
