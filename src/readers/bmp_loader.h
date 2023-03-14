@@ -5,8 +5,7 @@
 #include "bitmap.h"
 
 #pragma pack(push, 1)
-struct bitmap_header
-{
+struct bitmap_header {
     u16 file_type;
     u32 file_size;
     u16 reserved_1;

@@ -3,8 +3,7 @@
 #include "reader_defs.h"
 #include "../console/console.h"
 
-struct file_reader // circular buffer data structure for storing read bytes from a file
-{
+struct file_reader { // circular buffer data structure for storing read bytes from a file 
     struct console*   console;
     HANDLE            file_handle;
     u32               read_bytes_so_far;
