@@ -28,7 +28,7 @@ set LFLAGS=%NoIncrementalLinking%^
 
 pushd build
 
-cl %CFLAGS% ../src/main.c /link %LFLAGS%
+cl %CFLAGS% ../src/main.c ../src/maze.c /link %LFLAGS%
 
 popd
 
