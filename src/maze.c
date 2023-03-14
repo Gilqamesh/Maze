@@ -7,9 +7,7 @@ static inline void _maze_set_entry(struct maze* self, struct v2u32 p, enum maze_
     self->data[p.y * self->dims.x + p.x] = (char) new_entry;
 }
 
-bool maze__create(struct maze* self, struct v2u32 dims, struct v2u32 start, struct v2u32 end, u32 seed) {
-    self->start            = start;
-    self->end              = end;
+bool maze__create(struct maze* self, struct v2u32 dims, u32 seed) {
     self->build_steps.dims = dims;
     self->build_steps.fill = 0;
     self->build_step_count = 0;
@@ -57,10 +55,6 @@ enum maze_direction {
 };
 
 void _maze_dig(struct maze* self, struct v2u32 p) {
-    if (p.x >= self->dims.x || p.y >= self->dims.y) {
-        return ;
-    }
-
     _maze_set_entry(self, p, MAZE_ENTRY_ROOM);
 
     enum maze_direction directions_to_try[4] = {
@@ -115,7 +109,11 @@ void maze__build(struct maze* self) {
     }
 
     srand(self->seed);
-    _maze_dig(self, self->start);
+    struct v2u32 entrance = v2u32(0, 1);
+    struct v2u32 exit     = v2u32(self->dims.x - 1, self->dims.y - 2);
+    _maze_set_entry(self, entrance, MAZE_ENTRY_ROOM);
+    _maze_set_entry(self, exit, MAZE_ENTRY_ROOM);
+    _maze_dig(self, v2u32(1, 1));
 
     self->is_finished = true;
 }

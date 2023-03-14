@@ -2,13 +2,16 @@
 
 #include "window_defs.h"
 
+// RGBA
+
 enum colors {
-    COLOR_RED    = 0xff0000ff,
-    COLOR_GREEN  = 0x00ff00ff,
-    COLOR_BLUE   = 0x0000ffff,
-    COLOR_YELLOW = 0xffff00ff,
-    COLOR_PURPLE = 0xff00ffff,
-    COLOR_CYAN   = 0x00ffffff,
-    COLOR_WHITE  = 0xffffffff,
-    COLOR_BLACK  = 0x000000ff
+    COLOR_RED    = RGB(255, 0, 0),
+    COLOR_GREEN  = RGB(0, 255, 0),
+    COLOR_BLUE   = RGB(0, 0, 255),
+    COLOR_YELLOW = RGB(255, 255, 0),
+    COLOR_PURPLE = RGB(255, 0, 255),
+    COLOR_CYAN   = RGB(0, 255, 255),
+    COLOR_WHITE  = RGB(255, 255, 255),
+    COLOR_GRAY   = RGB(200, 200, 200),
+    COLOR_BLACK  = RGB(0, 0, 0)
 };

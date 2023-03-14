@@ -6,10 +6,9 @@
 
 // todo(david): make this hold a texture and/or text, sound etc.
 struct button {
-    struct window* window;
+    struct button* next;
     struct v2r32   p;
     struct v2r32   dims;
-    struct v2u32   original_window_dims;
     enum color     color_passive;
     enum color     color_hovered;
     enum color     color_active;
@@ -17,14 +16,10 @@ struct button {
     bool           is_hovered;
 };
 
-// @param p
-// @param dims
-DLLEXPORT void button__create(struct button* self, struct window* window, struct v2r32 p, struct v2r32 dims, enum color color_passive, enum color color_hovered, enum color color_active);
+DLLEXPORT void button__create(struct button* self, struct v2r32 p, struct v2r32 dims, enum color color_passive, enum color color_hovered, enum color color_active);
 DLLEXPORT void button__destroy(struct button* self);
-
-DLLEXPORT void button__update(struct button* self);
 
 DLLEXPORT enum color button__get_color(struct button* self);
 DLLEXPORT bool button__is_pressed(struct button* self);
 
-DLLEXPORT void button__render(struct button* self);
+DLLEXPORT void button__update_and_render(struct button* self, struct window* window, struct v2u32 mp, struct v2r32 ui_group_offset, struct v2r32 ui_group_dims, struct v2r32 ui_group_scale, bool is_mouse_lbutton_pressed);

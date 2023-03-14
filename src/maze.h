@@ -34,9 +34,6 @@ struct maze {
     char*                    data;
     struct v2u32             dims;
 
-    struct v2u32             start;
-    struct v2u32             end;
-
     struct maze_build_steps  build_steps;
     u32                      build_step_count;
 
@@ -45,7 +42,7 @@ struct maze {
     bool                     is_finished;
 };
 
-bool maze__create(struct maze* self, struct v2u32 dims, struct v2u32 start, struct v2u32 end, u32 seed);
+bool maze__create(struct maze* self, struct v2u32 dims, u32 seed);
 void maze__destroy(struct maze* self);
 
 void maze__build(struct maze* self);
