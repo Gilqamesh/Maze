@@ -3,8 +3,7 @@
 
 static inline void _window_button_state_process(struct window* self, bool is_down, enum key key) {
     struct button_state* button_state = &self->input_state.buttons[key];
-    if (button_state->ended_down != is_down)
-    {
+    if (button_state->ended_down != is_down) {
         ++button_state->half_transition_count;
         button_state->ended_down = is_down;
     }
@@ -54,7 +53,7 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT message_code, WPARAM 
             if (ReleaseCapture() == FALSE) {
                 console__fatal(window->console, "in '_window_callback': SetCapture returned NULL, GetLastError() = %d\n", GetLastError());
             }
-            _window_button_state_process(window, false, MOUSE_RBUTTON);
+            _window_button_state_process(window, false, MOUSE_LBUTTON);
         } break ;
         case WM_SIZE: {
             struct v2u32 new_dims = v2u32(LOWORD(l_param), HIWORD(l_param));

@@ -1,9 +1,7 @@
 ## Build steps
 
-# Run the following batch files in order
-- shell.bat # to initialize msvc compiler, please search for another vcvarsall.bat if it's not under that path
-- build_console.bat
-- build-
+# Run the following batch file to build
+- build.bat
 
 ## Controls
 - Press the top left button to generate a maze with increased dimensions

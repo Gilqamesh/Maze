@@ -18,7 +18,7 @@ bool window__create(struct window* self, HINSTANCE app_handle, const char* windo
     self->dims               = window_dims;
     for (u32 button_index = 0; button_index < ARRAY_SIZE(self->input_state.buttons); ++button_index) {
         self->input_state.buttons[button_index].half_transition_count = 0;
-        self->input_state.buttons[button_index].ended_down = 0;
+        self->input_state.buttons[button_index].ended_down = false;
     }
 
     if (bit_buffer__create(&self->frame_buffer, window_dims) == false) {

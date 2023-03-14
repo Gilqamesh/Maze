@@ -25,8 +25,10 @@ void button__update(struct button* self) {
         mp.y <= cur_p.y + cur_dims.y
     ) {
         self->is_hovered = true;
-        if (window__is_key_down(self->window, MOUSE_LBUTTON)) {
+        if (window__is_key_pressed(self->window, MOUSE_LBUTTON)) {
             self->is_pressed = true;
+        } else {
+            self->is_pressed = false;
         }
     } else {
         self->is_pressed = false;

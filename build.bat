@@ -19,6 +19,4 @@ call build_ui.bat
 @Rem Finally build the executable
 call build_app.bat
 
-move mazegenerator.exe ..
-
 popd %BUILD_DIR%
