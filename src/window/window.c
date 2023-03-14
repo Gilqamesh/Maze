@@ -59,11 +59,13 @@ bool window__create(struct window* self, HINSTANCE app_handle, const char* windo
 }
 
 void window__destroy(struct window* self) {
-    if (PostMessageA(self->window_handle, WM_CLOSE, 0, 0) == 0) {
-        console__fatal(self->console, "in 'window__destroy': PostMessageW returned 0, GetLastError() = %d\n", GetLastError());
-    }
-
     bit_buffer__destroy(&self->frame_buffer);
+
+    self->window_handle = NULL;
+}
+
+void window__close_next_frame(struct window* self) {
+    self->destroy_next_frame = true;
 }
 
 bool window__does_exist(struct window* self) {
@@ -75,8 +77,6 @@ bool window__does_exist(struct window* self) {
             TranslateMessage(&Message);
             DispatchMessageA(&Message);
         }
-
-        bit_buffer__destroy(&self->frame_buffer);
 
         return false;
     } else {
@@ -113,19 +113,19 @@ void window__poll_inputs(struct window* self) {
 }
 
 void window__end_draw(struct window* self) {
-    HDC window_device_context = GetDC(self->window_handle);
-    if (window_device_context == NULL) {
-        console__fatal(self->console, "in 'window__end_draw': GetDC failed\n");
-    }
-
     RECT client_rect;
     if (GetClientRect(self->window_handle, &client_rect) == 0) {
         console__fatal(self->console, "in 'window__end_draw': GetClientRect failed, GetLastError = %d\n", GetLastError());
     }
 
-    bit_buffer__blit_to_window(&self->frame_buffer, window_device_context, self->dims);
+    HDC window_device_context_handle = GetDC(self->window_handle);
+    if (window_device_context_handle == NULL) {
+        console__fatal(self->console, "in 'window__end_draw': GetDC failed\n");
+    }
 
-    ReleaseDC(self->window_handle, window_device_context);
+    bit_buffer__blit_to_window(&self->frame_buffer, client_rect, window_device_context_handle);
+
+    ReleaseDC(self->window_handle, window_device_context_handle);
 
     InvalidateRect(self->window_handle, NULL, FALSE);
 }
@@ -150,6 +150,9 @@ u32 window__is_key_pressed(struct window* self, enum key key) {
 
 bool window__is_key_down(struct window* self, enum key key) {
     return self->input_state.buttons[key].ended_down;
+}
+
+void window__clear_screen(struct window* self, enum color color) {
 }
 
 void window__draw_rectangle(struct window* self, struct v2u32 position, struct v2u32 dims, enum color color) {

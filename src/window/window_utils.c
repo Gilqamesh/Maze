@@ -56,13 +56,13 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT MessageCode, WPARAM W
             }
             _window_button_state_process(window, false, MOUSE_RBUTTON);
         } break ;
-        // case WM_LBUTTONDBLCLK: {
-        // } break ;
         case WM_KEYUP:
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP: {
-            // INVALID_CODE_PATH;
+            struct window* window = _window_get_from_handle(window_handle);
+            console__fatal(window->console, "in '_window_callback': should handle input polling in a separate queue");
+            ExitProcess(APP_ERROR_INVALID_CODE_PATH);
         } break ;
         default: {
             result = DefWindowProcA(window_handle, MessageCode, WParam, LParam);

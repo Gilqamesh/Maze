@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "bit_buffer.h": "c",
+        "v2u32.h": "c",
+        "v2r32.h": "c"
+    }
+}

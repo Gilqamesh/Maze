@@ -13,17 +13,23 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
 
     window__init_module(&window, &console);
 
-    struct v2u32 window_p = v2u32(400, 300);
-    struct v2u32 window_d = v2u32(800, 600);
-    window__create(&window, app_handle, "Maze generator", window_p, window_d);
+    window__create(&window, app_handle, "Maze generator", v2u32(400, 300), v2u32(800, 600));
 
     while (window__does_exist(&window)) {
         window__poll_inputs(&window);
 
+        if (window__is_key_pressed(&window, KEY_ESCAPE)) {
+            window__close_next_frame(&window);
+        }
+
+        window__draw_rectangle(&window, v2u32(0, 0), v2u32(300, 200), COLOR_WHITE);
+        window__draw_rectangle(&window, v2u32(30, 30), v2u32(300, 200), COLOR_RED);
+
         window__end_draw(&window);
     }
 
-    window__deinit_module(&window);
+    window__destroy(&window);
 
+    window__deinit_module(&window);
     console__deinit_module(&console);
 }

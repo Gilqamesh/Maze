@@ -28,15 +28,18 @@ DLLEXPORT void window__deinit_module(struct window* self);
 DLLEXPORT bool window__create(struct window* self, HINSTANCE app_handle, const char* window_name, struct v2u32 window_pos, struct v2u32 window_dims);
 DLLEXPORT void window__destroy(struct window* self);
 
+DLLEXPORT void window__close_next_frame(struct window* self);
 DLLEXPORT bool window__does_exist(struct window* self);
 DLLEXPORT void window__show(struct window* self);
 DLLEXPORT void window__poll_inputs(struct window* self);
+
 DLLEXPORT void window__end_draw(struct window* self);
 
 DLLEXPORT struct v2u32 window__mouse_get_position(struct window* self);
 DLLEXPORT u32 window__is_key_pressed(struct window* self, enum key key);
 DLLEXPORT bool window__is_key_down(struct window* self, enum key key);
 
+DLLEXPORT void window__clear_screen(struct window* self, enum color color);
 DLLEXPORT void window__draw_rectangle(struct window* self, struct v2u32 position, struct v2u32 dims, enum color color);
 
 

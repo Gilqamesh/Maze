@@ -31,3 +31,5 @@ pushd build
 cl %CFLAGS% ../src/main.c /link %LFLAGS%
 
 popd
+
+build\%EXECUTABLE%
