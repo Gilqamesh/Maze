@@ -96,6 +96,7 @@ void window__poll_inputs(struct window* self) {
 
     for (u32 button_index = 0; button_index < ARRAY_SIZE(self->input_state.buttons); ++button_index) {
         self->input_state.buttons[button_index].half_transition_count = 0;
+        self->input_state.buttons[button_index].ended_down = false;
     }
 
     MSG message = { 0 };
@@ -156,10 +157,10 @@ void window__clear_screen(struct window* self, enum color color) {
 void window__draw_rectangle(struct window* self, struct v2r32 position, struct v2r32 dims, enum color color) {
     // TODO(david): write renderer instead of messing with coordinates in drawing routines
     struct v2u32 start_p = v2u32((u32)round(position.x), (u32)round(position.y));
-    start_p = clamp__v2u32(v2u32(0, 0), start_p, self->dims);
+    start_p = clamp__v2u32(v2u32(0, 0), start_p, v2u32(self->frame_buffer.dims.x - 1, self->frame_buffer.dims.y - 1));
 
     struct v2u32 end_p = v2u32((u32)round(position.x + dims.x), (u32)round(position.y + dims.y));
-    end_p = clamp__v2u32(v2u32(0, 0), end_p, self->dims);
+    end_p = clamp__v2u32(v2u32(0, 0), end_p, v2u32(self->frame_buffer.dims.x - 1, self->frame_buffer.dims.y - 1));
 
     struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
 
@@ -176,8 +177,8 @@ void window__draw_rectangle(struct window* self, struct v2r32 position, struct v
 
 void window__draw_bitmap(struct window* self, struct v2u32 position, struct bitmap* bitmap) {
     // TODO(david): write renderer instead of messing with coordinates in drawing routines
-    struct v2u32 start_p = clamp__v2u32(v2u32(0, 0), position, self->dims);
-    struct v2u32 end_p   = clamp__v2u32(v2u32(0, 0), v2u32(start_p.x + bitmap->dims.x, start_p.y + bitmap->dims.y), self->dims);
+    struct v2u32 start_p = clamp__v2u32(v2u32(0, 0), position, self->frame_buffer.dims);
+    struct v2u32 end_p   = clamp__v2u32(v2u32(0, 0), v2u32(start_p.x + bitmap->dims.x, start_p.y + bitmap->dims.y), self->frame_buffer.dims);
 
     struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
 

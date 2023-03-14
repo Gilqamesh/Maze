@@ -25,6 +25,7 @@ set LFLAGS=%NoIncrementalLinking%^
                 /SUBSYSTEM:WINDOWS^
                 console.lib^
                 window.lib^
+                button.lib^
                 file_reader.lib
 
 pushd build

@@ -60,7 +60,9 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT message_code, WPARAM 
             struct v2u32 new_dims = v2u32(LOWORD(l_param), HIWORD(l_param));
             struct window* window = _window_get_from_handle(window_handle);
             window->dims = new_dims;
-            bit_buffer__resize(&window->frame_buffer, window->dims);
+            if (bit_buffer__resize(&window->frame_buffer, window->dims) == false) {
+                console__fatal(window->console, "in '_window_callback': bit_buffer__resize failed");
+            }
         } break ;
         case WM_KEYUP:
         case WM_KEYDOWN:
