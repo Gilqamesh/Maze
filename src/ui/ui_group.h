@@ -5,10 +5,12 @@
 #include "../math/v2r32.h"
 #include "../window/window.h"
 #include "button.h"
+#include "box.h"
 
 struct ui_group {
     struct window* window;
     struct button* buttons;
+    struct box*    boxes;
     struct v2r32   p;
     struct v2r32   dims;
     struct v2u32   original_window_dims;
@@ -21,6 +23,7 @@ DLLEXPORT void ui_group__create(struct ui_group* self, struct window* window, st
 DLLEXPORT void ui_group__destroy(struct ui_group* self);
 
 DLLEXPORT void ui_group__push_button(struct ui_group* self, struct button* button);
+DLLEXPORT void ui_group__push_box(struct ui_group* self, struct box* box);
 
 DLLEXPORT void ui_group__update_and_render(struct ui_group* self);
 

@@ -3,6 +3,7 @@
 void ui_group__create(struct ui_group* self, struct window* window, struct v2r32 p, struct v2r32 dims, enum color color_passive, enum color color_hovered) {
     self->window               = window;
     self->buttons              = NULL;
+    self->boxes                = NULL;
     self->p                    = p;
     self->dims                 = dims;
     self->original_window_dims = window->dims;
@@ -17,11 +18,21 @@ void ui_group__destroy(struct ui_group* self) {
         button__destroy(self->buttons);
         self->buttons = next;
     }
+    while (self->boxes) {
+        struct box* next = self->boxes->next;
+        box__destroy(self->boxes);
+        self->boxes = next;
+    }
 }
 
 void ui_group__push_button(struct ui_group* self, struct button* button) {
     button->next = self->buttons;
     self->buttons = button;
+}
+
+void ui_group__push_box(struct ui_group* self, struct box* box) {
+    box->next = self->boxes;
+    self->boxes = box;
 }
 
 void ui_group__update_and_render(struct ui_group* self) {
@@ -48,6 +59,12 @@ void ui_group__update_and_render(struct ui_group* self) {
     while (cur_button) {
         button__update_and_render(cur_button, self->window, mp, cur_p, cur_dims, ui_group_scale, is_mouse_lbutton_pressed);
         cur_button = cur_button->next;
+    }
+
+    struct box* cur_box = self->boxes;
+    while (cur_box) {
+        box__update_and_render(cur_box, self->window, mp, cur_p, cur_dims, ui_group_scale);
+        cur_box = cur_box->next;
     }
 }
 

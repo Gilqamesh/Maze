@@ -21,5 +21,6 @@ set LFLAGS=^
 
 cl %CFLAGS%^
     ../src/%MODULE_NAME%/button.c^
+    ../src/%MODULE_NAME%/box.c^
     ../src/%MODULE_NAME%/ui_group.c^
     /link %LFLAGS%
