@@ -14,7 +14,8 @@ set CFLAGS=%GenerateIntrinsicFunctions%^
            %FullSmbolicDebuggingInformation%^
            %NoLogo%^
            %DisableStandardCStackUnwinding%^
-           %MultithreadStaticRunTimeLibraryWithDebug%
+           %MultithreadStaticRunTimeLibraryWithDebug%^
+           /Fe%EXECUTABLE%
 
 set NoIncrementalLinking=/INCREMENTAL:NO
 set EliminateNotReferencedFunctions=/OPT:REF
@@ -27,6 +28,6 @@ set LFLAGS=%NoIncrementalLinking%^
 
 pushd build
 
-cl %CFLAGS% ../src/main.c /Fe %EXECUTABLE% /link %LFLAGS%
+cl %CFLAGS% ../src/main.c /link %LFLAGS%
 
 popd

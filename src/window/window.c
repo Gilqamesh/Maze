@@ -14,9 +14,9 @@ void window__deinit_module(struct window* self) {
 bool window__create(struct window* self, HINSTANCE app_handle, const char* window_name, struct v2u32 window_pos, struct v2u32 window_dims) {
     self->destroy_next_frame = false;
 
-    bit_buffer__create(&self->frame_buffer, window_dims);
-
-    const DWORD window_style = WS_OVERLAPPEDWINDOW;
+    if (bit_buffer__create(&self->frame_buffer, window_dims) == false) {
+        return false;
+    }
 
     WNDCLASSA window_class = { 0 };
     window_class.style = CS_DBLCLKS;
@@ -26,32 +26,40 @@ bool window__create(struct window* self, HINSTANCE app_handle, const char* windo
     const char* class_name = "window_class_name";
     if (window_class.hInstance == NULL) {
         console__fatal(self->console, "in 'window__create': GetModuleHandleW failed, GetLastError() = %d\n", GetLastError());
+        return false;
     }
     window_class.lpszClassName = class_name;
 
     if (RegisterClassA(&window_class) == 0) {
         // TODO(david): probably already registered
         console__fatal(self->console, "in 'window__create': RegisterClassW failed, GetLastError() = %d\n", GetLastError());
+        return false;
     }
 
-    self->window_handle = CreateWindowA(
-        class_name, window_name,
+    const DWORD window_style = WS_OVERLAPPEDWINDOW;
+    const DWORD extended_window_style = 0;
+    const HWND parent_window_handle = NULL;
+    const HMENU menu_handle = NULL;
+
+    self->window_handle = CreateWindowExA(
+        extended_window_style, class_name, window_name,
         window_style, window_pos.x, window_pos.y,
-        window_dims.x, window_dims.y, NULL, NULL,
-        app_handle, self
+        window_dims.x, window_dims.y, parent_window_handle,
+        menu_handle, app_handle, self
     );
     
     if (self->window_handle == NULL) {
         console__fatal(self->console, "in 'window__create': CreateWindowExW failed, GetLastError() = %d\n", GetLastError());
+        return false;
     }
 
-    ShowWindow(self->window_handle, SW_SHOW);
+    window__show(self);
 
     return true;
 }
 
 void window__destroy(struct window* self) {
-    if (PostMessageW(self->window_handle, WM_CLOSE, 0, 0) == 0) {
+    if (PostMessageA(self->window_handle, WM_CLOSE, 0, 0) == 0) {
         console__fatal(self->console, "in 'window__destroy': PostMessageW returned 0, GetLastError() = %d\n", GetLastError());
     }
 
@@ -63,9 +71,9 @@ bool window__does_exist(struct window* self) {
         self->destroy_next_frame = false;
         DestroyWindow(self->window_handle);
         MSG Message = { 0 };
-        while (PeekMessageW(&Message, self->window_handle, 0, 0, PM_REMOVE)) {
+        while (PeekMessageA(&Message, self->window_handle, 0, 0, PM_REMOVE)) {
             TranslateMessage(&Message);
-            DispatchMessageW(&Message);
+            DispatchMessageA(&Message);
         }
 
         bit_buffer__destroy(&self->frame_buffer);
@@ -77,6 +85,7 @@ bool window__does_exist(struct window* self) {
 }
 
 void window__show(struct window* self) {
+    ShowWindow(self->window_handle, SW_SHOW);
 }
 
 void window__poll_inputs(struct window* self) {
@@ -87,7 +96,7 @@ void window__poll_inputs(struct window* self) {
     }
 
     MSG message = { 0 };
-    while (PeekMessageW(&message, self->window_handle, 0, 0, PM_REMOVE)) {
+    while (PeekMessageA(&message, self->window_handle, 0, 0, PM_REMOVE)) {
         TranslateMessage(&message);
         switch (message.message) {
             case WM_KEYUP:

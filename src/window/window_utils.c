@@ -24,13 +24,12 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT MessageCode, WPARAM W
 
     switch (MessageCode) {
         case WM_CREATE: {
-            struct window* window = _window_get_from_handle(window_handle);
             CREATESTRUCT *create_window_params = (CREATESTRUCT *)LParam;
             if (create_window_params == NULL) {
-                console__fatal(window->console, "in '_window_callback': create_window_params is NULL\n");
+                ExitProcess(APP_ERROR_WM_CREATE);
             }
 
-            SetWindowLongPtrW(window_handle, GWLP_USERDATA, (LONG_PTR)create_window_params->lpCreateParams);
+            SetWindowLongPtrA(window_handle, GWLP_USERDATA, (LONG_PTR)create_window_params->lpCreateParams);
         } break ;
         case WM_CLOSE: {
             struct window* window = _window_get_from_handle(window_handle);
@@ -66,7 +65,7 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT MessageCode, WPARAM W
             // INVALID_CODE_PATH;
         } break ;
         default: {
-            result = DefWindowProcW(window_handle, MessageCode, WParam, LParam);
+            result = DefWindowProcA(window_handle, MessageCode, WParam, LParam);
         };
     }
 
