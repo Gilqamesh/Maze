@@ -6,9 +6,18 @@
 #include "ui/ui_group.h"
 
 static void maze__render(struct maze* self, struct window* window, struct ui_group* render_context_holder, struct box* render_context) {
-    struct v2r32 entry_offset = v2r32(render_context_holder->p.x + render_context->p.x, render_context_holder->p.y + render_context->p.y);
-    struct v2r32 entry_dims   = v2r32((r32) render_context->dims.x / self->dims.x, (r32) render_context->dims.y / self->dims.y);;
-    // struct v2r32 entry_dims = v2r32((r32)window->dims.x / (r32)self->dims.x, (r32)window->dims.y / (r32)self->dims.y);
+    struct v2r32 ui_group_scale = v2r32(
+        (r32) window->dims.x / (r32) render_context_holder->original_window_dims.x,
+        (r32) window->dims.y / (r32) render_context_holder->original_window_dims.y
+    );
+    struct v2r32 entry_offset = v2r32(
+        ui_group_scale.x * render_context_holder->p.x + render_context->p.x,
+        ui_group_scale.y * render_context_holder->p.y + render_context->p.y
+    );
+    struct v2r32 entry_dims   = v2r32(
+        ui_group_scale.x * render_context->dims.x / (r32) self->dims.x,
+        ui_group_scale.y * render_context->dims.y / (r32) self->dims.y
+    );
     for (u32 r = 0; r < self->dims.y; ++r) {
         for (u32 c = 0; c < self->dims.x; ++c) {
             switch (maze__get_entry(self, v2u32(c, r))) {
