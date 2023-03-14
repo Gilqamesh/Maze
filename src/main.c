@@ -67,7 +67,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
     struct maze maze;
 
     struct v2u32 maze_dims = v2u32(12, 3);
-    if (maze__create(&maze, maze_dims, 42) == false) {
+    if (maze__create(&maze, &maze_dims, 42) == false) {
         console__fatal(&console, "failed to create the maze");
     }
 
@@ -105,11 +105,30 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
     );
     ui_group__create(&ui_group_overlay, &window, ui_group_overlay_p, ui_group_overlay_dims, COLOR_WHITE, COLOR_GRAY);
 
-    struct button generate_new_maze_button;
-    struct v2r32 generate_new_maze_button_p    = v2r32(0.0f, 0.0f);
-    struct v2r32 generate_new_maze_button_dims = v2r32(50.0f, 50.0f);
-    button__create(&generate_new_maze_button, generate_new_maze_button_p, generate_new_maze_button_dims, COLOR_BLUE, COLOR_YELLOW, COLOR_RED);
-    ui_group__push_button(&ui_group_overlay, &generate_new_maze_button);
+    struct v2r32 button_dims_within_main_canvas_overlay   = v2r32(50.0f, 50.0f);
+    struct v2r32 button_offset_within_main_canvas_overlay = v2r32(button_dims_within_main_canvas_overlay.x / 5.0f, button_dims_within_main_canvas_overlay.y / 5.0f);
+
+    u32 button_within_main_canvas_overlay_counter = 0;
+
+    struct button button_increment_maze_dimensions;
+    struct v2r32 button_increment_maze_dimensions_p = v2r32(
+        button_within_main_canvas_overlay_counter * (button_dims_within_main_canvas_overlay.x + button_offset_within_main_canvas_overlay.x),
+        0.0f
+    );
+    struct v2r32 button_increment_maze_dimensions_dims = button_dims_within_main_canvas_overlay;
+    button__create(&button_increment_maze_dimensions, button_increment_maze_dimensions_p, button_increment_maze_dimensions_dims, COLOR_BLUE, COLOR_YELLOW, COLOR_RED);
+    ui_group__push_button(&ui_group_overlay, &button_increment_maze_dimensions);
+
+    ++button_within_main_canvas_overlay_counter;
+
+    struct button button_decrement_maze_dimensions;
+    struct v2r32 button_decrement_maze_dimensions_p = v2r32(
+        button_within_main_canvas_overlay_counter * (button_dims_within_main_canvas_overlay.x + button_offset_within_main_canvas_overlay.x),
+        0.0f
+    );
+    struct v2r32 button_decrement_maze_dimensions_dims = button_dims_within_main_canvas_overlay;
+    button__create(&button_decrement_maze_dimensions, button_decrement_maze_dimensions_p, button_decrement_maze_dimensions_dims , COLOR_BLUE, COLOR_YELLOW, COLOR_RED);
+    ui_group__push_button(&ui_group_overlay, &button_decrement_maze_dimensions);
 
     while (window__does_exist(&window)) {
         window__poll_inputs(&window);
@@ -126,11 +145,20 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
         ui_group__update_and_render(&ui_group_main_canvas);
         maze__render(&maze, &window, &ui_group_main_canvas, &maze_holder_box);
 
-        if (button__is_pressed(&generate_new_maze_button)) {
+        if (button__is_pressed(&button_increment_maze_dimensions)) {
             maze__destroy(&maze);
             ++maze_dims.x;
             ++maze_dims.y;
-            if (maze__create(&maze, maze_dims, 100) == false) {
+            if (maze__create(&maze, &maze_dims, rand()) == false) {
+                console__fatal(&console, "failed to create the maze");
+            }
+            maze__build(&maze);
+        }
+        if (button__is_pressed(&button_decrement_maze_dimensions)) {
+            maze__destroy(&maze);
+            --maze_dims.x;
+            --maze_dims.y;
+            if (maze__create(&maze, &maze_dims, rand()) == false) {
                 console__fatal(&console, "failed to create the maze");
             }
             maze__build(&maze);

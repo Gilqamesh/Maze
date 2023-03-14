@@ -2,6 +2,7 @@
 
 #include "math_defs.h"
 #include "v2u32.h"
+#include "v2r32.h"
 
 static inline u32 clamp__u32(u32 min, u32 value, u32 max) {
     if (value < min) {

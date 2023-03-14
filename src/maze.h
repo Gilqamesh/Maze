@@ -42,7 +42,7 @@ struct maze {
     bool                     is_finished;
 };
 
-bool maze__create(struct maze* self, struct v2u32 dims, u32 seed);
+bool maze__create(struct maze* self, struct v2u32 *dims, u32 seed);
 void maze__destroy(struct maze* self);
 
 void maze__build(struct maze* self);

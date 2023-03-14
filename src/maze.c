@@ -1,4 +1,5 @@
 #include "maze.h"
+#include "math/clamp.h"
 
 static inline void _maze_add_step(struct maze* self) {
 }
@@ -7,14 +8,18 @@ static inline void _maze_set_entry(struct maze* self, struct v2u32 p, enum maze_
     self->data[p.y * self->dims.x + p.x] = (char) new_entry;
 }
 
-bool maze__create(struct maze* self, struct v2u32 dims, u32 seed) {
-    self->build_steps.dims = dims;
+bool maze__create(struct maze* self, struct v2u32 *dims, u32 seed) {
+    *dims = clamp__v2u32(
+        v2u32(10, 10),
+        *dims,
+        v2u32(250, 250)
+    );
+    self->build_steps.dims = *dims;
     self->build_steps.fill = 0;
     self->build_step_count = 0;
     self->seed             = seed;
     self->is_finished      = false;
-
-    self->dims = v2u32(2 * dims.x + 1, 2 * dims.y + 1);
+    self->dims = v2u32(2 * dims->x + 1, 2 * dims->y + 1);
     self->data = (char*) calloc(self->dims.x * self->dims.y, sizeof(*self->data));
     if (self->data == NULL) {
         return false;
