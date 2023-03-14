@@ -19,11 +19,7 @@ set LFLAGS=^
     /SUBSYSTEM:WINDOWS^
     console.lib
 
-pushd build
-
 cl %CFLAGS%^
     ../src/%MODULE_NAME%/file_reader.c^
     ../src/%MODULE_NAME%/bmp_loader.c^
     /link %LFLAGS%
-
-popd

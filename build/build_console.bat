@@ -17,8 +17,4 @@ set LFLAGS=^
     /DEBUG^
     /PDB:%MODULE_NAME%.pdb 
 
-pushd build
-
 cl %CFLAGS% ../src/%MODULE_NAME%/%MODULE_NAME%.c /link %LFLAGS%
-
-popd

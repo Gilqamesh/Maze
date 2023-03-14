@@ -19,10 +19,6 @@ set LFLAGS=^
     /SUBSYSTEM:WINDOWS^
     window.lib
 
-pushd build
-
 cl %CFLAGS%^
     ../src/%MODULE_NAME%/button.c^
     /link %LFLAGS%
-
-popd

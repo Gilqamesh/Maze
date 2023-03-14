@@ -6,7 +6,7 @@
 #include "ui/button.h"
 
 static void maze__render(struct maze* self, struct window* window) {
-    struct v2r32 entry_dims = v2r32((u32)round((r32)window->dims.x / (r32)self->dims.x), (u32)round((r32)window->dims.y / (r32)self->dims.y));
+    struct v2r32 entry_dims = v2r32(round((r32)window->dims.x / (r32)self->dims.x), round((r32)window->dims.y / (r32)self->dims.y));
     for (u32 r = 0; r < self->dims.y; ++r) {
         for (u32 c = 0; c < self->dims.x; ++c) {
             switch (maze__get_entry(self, v2u32(c, r))) {
@@ -64,7 +64,8 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
 
     struct maze maze;
 
-    if (maze__create(&maze, v2u32(12, 3), v2u32(1, 1), v2u32(0, 0), 42) == false) {
+    struct v2u32 maze_dims = v2u32(12, 3);
+    if (maze__create(&maze, maze_dims, v2u32(1, 1), v2u32(0, 0), 42) == false) {
         console__fatal(&console, "failed to create the maze");
     }
 
@@ -97,7 +98,9 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
         button__update(&generate_new_maze_button);
         if (button__is_pressed(&generate_new_maze_button)) {
             maze__destroy(&maze);
-            if (maze__create(&maze, v2u32(20, 3), v2u32(1, 1), v2u32(0, 0), 100) == false) {
+            ++maze_dims.x;
+            ++maze_dims.y;
+            if (maze__create(&maze, maze_dims, v2u32(1, 1), v2u32(0, 0), 100) == false) {
                 console__fatal(&console, "failed to create the maze");
             }
             maze__build(&maze);

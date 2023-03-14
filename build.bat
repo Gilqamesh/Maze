@@ -1,37 +1,24 @@
 @echo off
 
-set EXECUTABLE=mazegenerator
+set BUILD_DIR=build
 
-set GenerateIntrinsicFunctions=/Oi
-set EnhanceOptimizedDebugging=/Zo
-set FullSmbolicDebuggingInformation=/Z7
-set NoLogo=/nologo
-set DisableStandardCStackUnwinding=/EHa-
-set MultithreadStaticRunTimeLibraryWithDebug=/MTd
+pushd %BUILD_DIR%
 
-set CFLAGS=%GenerateIntrinsicFunctions%^
-           %EnhanceOptimizedDebugging%^
-           %FullSmbolicDebuggingInformation%^
-           %NoLogo%^
-           %DisableStandardCStackUnwinding%^
-           %MultithreadStaticRunTimeLibraryWithDebug%^
-           /Fe%EXECUTABLE%
+@REM Initialize MSVC compiler
+call shell.bat
 
-set NoIncrementalLinking=/INCREMENTAL:NO
-set EliminateNotReferencedFunctions=/OPT:REF
+@REM Build order for all the modules
+call build_console.bat
 
-set LFLAGS=%NoIncrementalLinking%^
-                %EliminateNotReferencedFunctions%^
-                /SUBSYSTEM:WINDOWS^
-                console.lib^
-                window.lib^
-                button.lib^
-                file_reader.lib
+call build_readers.bat
 
-pushd build
+call build_window.bat
 
-cl %CFLAGS% ../src/main.c ../src/maze.c /link %LFLAGS%
+call build_ui.bat
 
-popd
+@Rem Finally build the executable
+call build_app.bat
 
-build\%EXECUTABLE%
+move mazegenerator.exe ..
+
+popd %BUILD_DIR%

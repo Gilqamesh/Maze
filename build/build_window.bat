@@ -22,12 +22,8 @@ set LFLAGS=^
     User32.lib^
     Gdi32.lib
 
-pushd build
-
 cl %CFLAGS%^
     ../src/%MODULE_NAME%/window.c^
     ../src/%MODULE_NAME%/window_utils.c^
     ../src/%MODULE_NAME%/bit_buffer.c^
     /link %LFLAGS%
-
-popd
