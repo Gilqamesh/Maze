@@ -38,34 +38,38 @@ void console__deinit_module(struct console* self)
 
 void console__log(struct console* self, char* msg, ...)
 {
-    va_list ap;
-    va_start(ap, msg);
+    if (self->out_handle != INVALID_HANDLE_VALUE) {
+        va_list ap;
+        va_start(ap, msg);
 
-    if (self->buffer_size <= vsnprintf(self->buffer, self->buffer_size, msg, ap)) {
-        // todo(david): diagnostic, truncated msg
+        if (self->buffer_size <= vsnprintf(self->buffer, self->buffer_size, msg, ap)) {
+            // todo(david): diagnostic, truncated msg
+        }
+
+        DWORD bytes_written;
+        if (WriteConsoleA(self->out_handle, self->buffer, strnlen(self->buffer, self->buffer_size), &bytes_written, NULL) == 0) {
+            // TODO(david): diagnostic
+        }
+
+        va_end(ap);
     }
-
-    DWORD bytes_written;
-    if (WriteConsoleA(self->out_handle, self->buffer, strnlen(self->buffer, self->buffer_size), &bytes_written, NULL) == 0) {
-        // TODO(david): diagnostic
-    }
-
-    va_end(ap);
 }
 
 void console__fatal(struct console* self, char *error_msg, ...)
 {
-    va_list ap;
-    va_start(ap, error_msg);
+    if (self->err_handle != INVALID_HANDLE_VALUE) {
+        va_list ap;
+        va_start(ap, error_msg);
 
-    if (self->buffer_size <= vsnprintf(self->buffer, self->buffer_size, error_msg, ap)) {
-        // todo(david): diagnostic, truncated msg
+        if (self->buffer_size <= vsnprintf(self->buffer, self->buffer_size, error_msg, ap)) {
+            // todo(david): diagnostic, truncated msg
+        }
+
+        DWORD bytes_written;
+        WriteConsoleA(self->err_handle, self->buffer, strnlen(self->buffer, self->buffer_size), &bytes_written, NULL);
+
+        va_end(ap);
     }
-
-    DWORD bytes_written;
-    WriteConsoleA(self->err_handle, self->buffer, strnlen(self->buffer, self->buffer_size), &bytes_written, NULL);
-
-    va_end(ap);
 
     console__deinit_module(self);
 

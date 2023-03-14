@@ -1,5 +1,6 @@
 #include "window.h"
 #include "window_utils.h"
+#include "../math/clamp.h"
 
 bool window__init_module(struct window* self, struct console* console) {
     self->console = console;
@@ -151,12 +152,23 @@ bool window__is_key_down(struct window* self, enum key key) {
 void window__clear_screen(struct window* self, enum color color) {
 }
 
-void window__draw_rectangle(struct window* self, struct v2u32 position, struct v2u32 dims, enum color color) {
-    struct bit_buffer *bit_buffer = &self->frame_buffer;
+void window__draw_rectangle(struct window* self, struct v2r32 position, struct v2r32 dims, enum color color) {
+    // TODO(david): write renderer instead of messing with coordinates in drawing routines
+    struct v2u32 start_p = v2u32((u32)round(position.x), (u32)round(position.y));
+    start_p = clamp__v2u32(v2u32(0, 0), start_p, self->dims);
 
-    for (u32 y = position.y; y < position.y + dims.y && y < bit_buffer->dims.y; ++y) {
-        for (u32 x = position.x; x < position.x + dims.x && x < bit_buffer->dims.x; ++x) {
-            ((u32 *)bit_buffer->buffer)[y * bit_buffer->dims.x + x] = *(u32 *)&color;
+    struct v2u32 end_p = v2u32((u32)round(position.x + dims.x), (u32)round(position.y + dims.y));
+    end_p = clamp__v2u32(v2u32(0, 0), end_p, self->dims);
+
+    struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
+
+    struct bit_buffer *bit_buffer = &self->frame_buffer;
+    u32* buffer_p = ((u32*) bit_buffer->buffer) + start_p.y * bit_buffer->dims.x + start_p.x;
+    u32  stride = self->dims.x;
+    for (u32 row_offset = 0; row_offset < clamped_dims.y; ++row_offset) {
+        for (u32 col_offset = 0; col_offset < clamped_dims.x; ++col_offset) {
+            *(buffer_p + col_offset) = *(u32 *)&color;
         }
+        buffer_p += stride;
     }
 }

@@ -19,12 +19,12 @@ static inline struct window* _window_get_from_handle(HWND window_handle) {
     return window;
 }
 
-LRESULT CALLBACK _window_callback(HWND window_handle, UINT MessageCode, WPARAM WParam, LPARAM LParam) {
+LRESULT CALLBACK _window_callback(HWND window_handle, UINT message_code, WPARAM w_param, LPARAM l_param) {
     LRESULT result = 0;
 
-    switch (MessageCode) {
+    switch (message_code) {
         case WM_CREATE: {
-            CREATESTRUCT *create_window_params = (CREATESTRUCT *)LParam;
+            CREATESTRUCT *create_window_params = (CREATESTRUCT *)l_param;
             if (create_window_params == NULL) {
                 ExitProcess(APP_ERROR_WM_CREATE);
             }
@@ -42,7 +42,7 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT MessageCode, WPARAM W
         } break ;
         case WM_MOUSEMOVE: {
             struct window* window = _window_get_from_handle(window_handle);
-            window->mouse_p = v2u32(GET_X_LPARAM(LParam), GET_Y_LPARAM(LParam));
+            window->mouse_p = v2u32(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
         } break ;
         case WM_LBUTTONDOWN: {
             SetCapture(window_handle);
@@ -56,6 +56,12 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT MessageCode, WPARAM W
             }
             _window_button_state_process(window, false, MOUSE_RBUTTON);
         } break ;
+        case WM_SIZE: {
+            struct v2u32 new_dims = v2u32(LOWORD(l_param), HIWORD(l_param));
+            struct window* window = _window_get_from_handle(window_handle);
+            window->dims = new_dims;
+            bit_buffer__resize(&window->frame_buffer, window->dims);
+        } break ;
         case WM_KEYUP:
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
@@ -65,7 +71,7 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT MessageCode, WPARAM W
             ExitProcess(APP_ERROR_INVALID_CODE_PATH);
         } break ;
         default: {
-            result = DefWindowProcA(window_handle, MessageCode, WParam, LParam);
+            result = DefWindowProcA(window_handle, message_code, w_param, l_param);
         };
     }
 

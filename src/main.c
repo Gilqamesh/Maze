@@ -4,16 +4,16 @@
 #include "maze.h"
 
 static void maze__render(struct maze* self, struct window* window) {
-    struct v2u32 entry_dims = v2u32(window->dims.x / self->dims.x, window->dims.y / self->dims.y);
+    struct v2r32 entry_dims = v2r32((r32)window->dims.x / (r32)self->dims.x, (r32)window->dims.y / (r32)self->dims.y);
     for (u32 r = 0; r < self->dims.y; ++r) {
         for (u32 c = 0; c < self->dims.x; ++c) {
             switch (maze__get_entry(self, v2u32(c, r))) {
                 case MAZE_ENTRY_ROOM: {
-                    struct v2u32 entry_p = v2u32(c * entry_dims.x, r * entry_dims.y);
+                    struct v2r32 entry_p = v2r32(c * entry_dims.x, r * entry_dims.y);
                     window__draw_rectangle(window, entry_p, entry_dims, COLOR_RED);
                 } break ;
                 case MAZE_ENTRY_WALL: {
-                    struct v2u32 entry_p = v2u32(c * entry_dims.x, r * entry_dims.y);
+                    struct v2r32 entry_p = v2r32(c * entry_dims.x, r * entry_dims.y);
                     window__draw_rectangle(window, entry_p, entry_dims, COLOR_WHITE);
                 } break ;
                 default: {
