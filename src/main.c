@@ -2,6 +2,7 @@
 #include "console/console.h"
 #include "window/window.h"
 #include "maze.h"
+#include "readers/bmp_loader.h"
 
 static void maze__render(struct maze* self, struct window* window) {
     struct v2r32 entry_dims = v2r32((r32)window->dims.x / (r32)self->dims.x, (r32)window->dims.y / (r32)self->dims.y);
@@ -33,10 +34,26 @@ static void maze__print(struct maze* self, struct console* console) {
     }
 }
 
+// TODO(david): asset loader
+static void assets__load(struct bitmap* bitmap_generate, struct console* console) {
+    struct file_reader reader;
+
+    struct bmp_loader bmp_loader;
+
+    const char* filename = "assets/art.bmp";
+    file_reader__create(&reader, console, filename);
+
+    if (bmp_loader__create(&bmp_loader, &reader, bitmap_generate) == false) {
+        console__fatal(console, "in 'assets__load': couldn't load file: %s\n", filename);
+    }
+
+    file_reader__destroy(&reader);
+}
+
 int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int show_cmd) {
     struct console console;
 
-    if (!console__init_module(&console, 256)) {
+    if (!console__init_module(&console, 512)) {
         // ExitProcess(EXIT_FAILURE);
     }
 
@@ -51,8 +68,6 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
     }
 
     maze__build(&maze);
-
-    // maze__print(&maze, &console);
 
     window__create(&window, app_handle, "Maze generator", v2u32(400, 300), v2u32(800, 600));
 
@@ -73,7 +88,6 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
     }
 
     window__destroy(&window);
-
     window__deinit_module(&window);
     console__deinit_module(&console);
 }

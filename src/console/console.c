@@ -2,6 +2,11 @@
 
 bool console__init_module(struct console* self, u32 max_message_length)
 {
+    self->buffer      = NULL;
+    self->buffer_size = 0;
+    self->out_handle  = INVALID_HANDLE_VALUE;
+    self->err_handle  = INVALID_HANDLE_VALUE;
+
     // TODO(david): diagnostics
     if (!AttachConsole(ATTACH_PARENT_PROCESS)) {
         return false;

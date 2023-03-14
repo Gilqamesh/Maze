@@ -24,7 +24,8 @@ set LFLAGS=%NoIncrementalLinking%^
                 %EliminateNotReferencedFunctions%^
                 /SUBSYSTEM:WINDOWS^
                 console.lib^
-                window.lib
+                window.lib^
+                file_reader.lib
 
 pushd build
 

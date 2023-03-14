@@ -42,5 +42,6 @@ DLLEXPORT bool window__is_key_down(struct window* self, enum key key);
 DLLEXPORT void window__clear_screen(struct window* self, enum color color);
 DLLEXPORT void window__draw_rectangle(struct window* self, struct v2r32 position, struct v2r32 dims, enum color color);
 
+DLLEXPORT void window__draw_bitmap(struct window* self, struct v2u32 position, struct bitmap* bitmap);
 
 #endif

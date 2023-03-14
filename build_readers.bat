@@ -1,6 +1,6 @@
 @echo off
 
-set MODULE_NAME=window
+set MODULE_NAME=readers
 
 set CFLAGS=^
     /Oi^
@@ -17,17 +17,13 @@ set LFLAGS=^
     /DEBUG^
     /PDB:%MODULE_NAME%.pdb^
     /SUBSYSTEM:WINDOWS^
-    console.lib^
-    Kernel32.lib^
-    User32.lib^
-    Gdi32.lib
+    console.lib
 
 pushd build
 
 cl %CFLAGS%^
-    ../src/%MODULE_NAME%/window.c^
-    ../src/%MODULE_NAME%/window_utils.c^
-    ../src/%MODULE_NAME%/bit_buffer.c^
+    ../src/%MODULE_NAME%/file_reader.c^
+    ../src/%MODULE_NAME%/bmp_loader.c^
     /link %LFLAGS%
 
 popd

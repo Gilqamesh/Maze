@@ -1,6 +1,7 @@
 #include "window.h"
 #include "window_utils.h"
 #include "../math/clamp.h"
+#include "../readers/bitmap.h"
 
 bool window__init_module(struct window* self, struct console* console) {
     self->console = console;
@@ -162,13 +163,35 @@ void window__draw_rectangle(struct window* self, struct v2r32 position, struct v
 
     struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
 
-    struct bit_buffer *bit_buffer = &self->frame_buffer;
-    u32* buffer_p = ((u32*) bit_buffer->buffer) + start_p.y * bit_buffer->dims.x + start_p.x;
-    u32  stride = self->dims.x;
+    u32  bit_buffer_stride = self->frame_buffer.dims.x;
+    u32* bit_buffer_p = ((u32*) self->frame_buffer.buffer) + start_p.y * bit_buffer_stride + start_p.x;
+
     for (u32 row_offset = 0; row_offset < clamped_dims.y; ++row_offset) {
         for (u32 col_offset = 0; col_offset < clamped_dims.x; ++col_offset) {
-            *(buffer_p + col_offset) = *(u32 *)&color;
+            *(bit_buffer_p + col_offset) = *(u32 *)&color;
         }
-        buffer_p += stride;
+        bit_buffer_p += bit_buffer_stride;
+    }
+}
+
+void window__draw_bitmap(struct window* self, struct v2u32 position, struct bitmap* bitmap) {
+    // TODO(david): write renderer instead of messing with coordinates in drawing routines
+    struct v2u32 start_p = clamp__v2u32(v2u32(0, 0), position, self->dims);
+    struct v2u32 end_p   = clamp__v2u32(v2u32(0, 0), v2u32(start_p.x + bitmap->dims.x, start_p.y + bitmap->dims.y), self->dims);
+
+    struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
+
+    u32  bit_buffer_stride = self->frame_buffer.dims.x;
+    u32* bit_buffer_p = (u32*) self->frame_buffer.buffer + start_p.y * bit_buffer_stride + start_p.x;
+
+    u32  bitmap_stride = bitmap->dims.x;
+    u32* bitmap_p = (u32*) bitmap->data;
+
+    for (u32 row_offset = 0; row_offset < clamped_dims.y; ++row_offset) {
+        for (u32 col_offset = 0; col_offset < clamped_dims.x; ++col_offset) {
+            *(bit_buffer_p + col_offset) = *(bitmap_p + col_offset);
+        }
+        bit_buffer_p += bit_buffer_stride;
+        bitmap_p     += bitmap_stride;
     }
 }
