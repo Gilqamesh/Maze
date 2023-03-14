@@ -82,7 +82,7 @@ void window__show(struct window* self) {
 void window__poll_inputs(struct window* self) {
     self->mouse_p_prev = self->mouse_p;
 
-    for (u32 button_index = 0; button_index < ArraySize(self->input_state.buttons); ++button_index) {
+    for (u32 button_index = 0; button_index < ARRAY_SIZE(self->input_state.buttons); ++button_index) {
         self->input_state.buttons[button_index].half_transition_count = 0;
     }
 

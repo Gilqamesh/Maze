@@ -21,7 +21,7 @@ typedef float  r32;
 typedef double r64;
 
 #define DLLEXPORT __declspec(dllexport)
-#define ArraySize(Array) (sizeof(Array)/sizeof((Array)[0]))
+#define ARRAY_SIZE(array) (sizeof(array)/sizeof((array)[0]))
 
 enum APP_ERROR {
     APP_ERROR_WINDOW_CALLBACK
