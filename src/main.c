@@ -11,8 +11,8 @@ static void maze__render(struct maze* self, struct window* window, struct ui_gro
         (r32) window->dims.y / (r32) render_context_holder->original_window_dims.y
     );
     struct v2r32 entry_offset = v2r32(
-        ui_group_scale.x * render_context_holder->p.x + render_context->p.x,
-        ui_group_scale.y * render_context_holder->p.y + render_context->p.y
+        ui_group_scale.x * render_context->p.x + ui_group_scale.x * render_context_holder->p.x,
+        ui_group_scale.y * render_context->p.y + ui_group_scale.y * render_context_holder->p.y
     );
     struct v2r32 entry_dims   = v2r32(
         ui_group_scale.x * render_context->dims.x / (r32) self->dims.x,
