@@ -1,3 +1,9 @@
+# Maze generator
+No third party libraries were used, everything is built from scratch, except for:
+- libc
+- compiler
+
+
 ## Build steps
 
 **Run the following batch file to build:**
