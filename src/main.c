@@ -20,7 +20,7 @@ static void maze__render(struct maze* self, struct window* window, struct ui_gro
     );
     for (u32 r = 0; r < self->dims.y; ++r) {
         for (u32 c = 0; c < self->dims.x; ++c) {
-            switch (maze__get_entry(self, v2u32(c, r))) {
+            switch (maze__get_entry(self, v2u16(c, r))) {
                 case MAZE_ENTRY_ROOM: {
                     struct v2r32 entry_p = v2r32(c * entry_dims.x + entry_offset.x, r * entry_dims.y + entry_offset.y);
                     window__draw_rectangle(window, entry_p, entry_dims, COLOR_RED);
@@ -40,7 +40,7 @@ static void maze__render(struct maze* self, struct window* window, struct ui_gro
 static void maze__print(struct maze* self, struct console* console) {
     for (u32 r = 0; r < self->dims.y; ++r) {
         for (u32 c = 0; c < self->dims.x; ++c) {
-            console__log(console, "%c", maze__get_entry(self, v2u32(c, r)));
+            console__log(console, "%c", maze__get_entry(self, v2u16(c, r)));
         }
         console__log(console, "\n");
     }
@@ -75,7 +75,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
 
     struct maze maze;
 
-    struct v2u32 maze_dims = v2u32(12, 3);
+    struct v2u16 maze_dims = v2u16(12, 3);
     if (maze__create(&maze, &maze_dims, 42) == false) {
         console__fatal(&console, "failed to create the maze");
     }
