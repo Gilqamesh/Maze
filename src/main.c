@@ -173,6 +173,8 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
             maze__build(&maze);
         }
 
+        maze__build_advance(&maze);
+
         window__end_draw(&window);
     }
 

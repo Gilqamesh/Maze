@@ -10,7 +10,7 @@ enum maze_entry {
 
 struct maze_build_steps { // stores each step of the build process
     struct v2u32  *data;
-    struct v2u32  dims;
+    u32           size;
     u32           fill;
 };
 
@@ -50,6 +50,6 @@ void maze__build(struct maze* self);
 enum maze_entry maze__get_entry(struct maze* self, struct v2u32 p);
 
 // @brief advance the build process by one (purely for animation purposes)
-void maze__build_advance(struct maze* self);
+bool maze__build_advance(struct maze* self);
 
 bool maze__is_finished(struct maze* self);
