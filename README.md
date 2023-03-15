@@ -8,4 +8,4 @@
 ## Controls
 - Press the overlay buttons to generate a maze with increased/decreased dimensions
 
-> Due to lack of asset loading / texture handling in my framework, can't currently make this part better
+> Due to lack of asset loading / texture handling implementation in my framework, can't currently make this part better
