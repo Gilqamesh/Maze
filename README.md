@@ -1,5 +1,6 @@
 # Maze generator
 No third party libraries were used, everything is built from scratch, except for:
+- windows gdi calls, win32 api
 - libc
 - compiler
 
