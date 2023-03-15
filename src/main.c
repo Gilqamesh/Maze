@@ -140,6 +140,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
     ui_group__push_button(&ui_group_overlay, &button_decrement_maze_dimensions);
 
     while (window__does_exist(&window)) {
+        // u64 time_start = __rdtsc();
         window__poll_inputs(&window);
 
         if (window__is_key_pressed(&window, KEY_ESCAPE)) {
@@ -176,6 +177,8 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
         maze__build_advance(&maze);
 
         window__end_draw(&window);
+        // u64 time_end = __rdtsc();
+        // console__log(&console, "Time taken for frame in cy: %lu\n", time_end - time_start);
     }
 
     ui_group__destroy(&ui_group_overlay);
