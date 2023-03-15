@@ -114,10 +114,10 @@ void maze__build(struct maze* self) {
     }
 
     srand(self->seed);
-    struct v2u32 entrance = v2u32(0, 1);
-    struct v2u32 exit     = v2u32(self->dims.x - 1, self->dims.y - 2);
-    _maze_set_entry(self, entrance, MAZE_ENTRY_ROOM);
-    _maze_set_entry(self, exit, MAZE_ENTRY_ROOM);
+    struct v2u32 maze_entrance = v2u32(0, 1);
+    struct v2u32 maze_exit     = v2u32(self->dims.x - 1, self->dims.y - 2);
+    _maze_set_entry(self, maze_entrance, MAZE_ENTRY_ROOM);
+    _maze_set_entry(self, maze_exit, MAZE_ENTRY_ROOM);
     _maze_dig(self, v2u32(1, 1));
 
     self->is_finished = true;
