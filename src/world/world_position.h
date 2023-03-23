@@ -1,6 +1,8 @@
 #pragma once
 
 #include "world_defs.h"
+
+#include "world_grid.h"
 #include "../math/v2i32.h"
 #include "../math/v2r32.h"
 
@@ -39,6 +41,6 @@
 */
 
 struct world_position {
-    struct v2i32 global_p;
-    struct v2r32 local_p;
+    struct world_grid_index global_p;
+    struct v2r32            local_p;
 };

@@ -9,6 +9,8 @@ call shell.bat
 
 @REM Build order for all the modules
 
+call build_world.bat
+
 call build_random.bat
 
 call build_console.bat

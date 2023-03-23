@@ -1,4 +1,4 @@
-#include "../window/window.h"
+#include "../console/console.h"
 #include "../random/random.h"
 
 #define NUMBER_OF_BUCKETS 1000

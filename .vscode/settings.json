@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "random": "c",
-        "cmath": "c"
+        "cmath": "c",
+        "math_defs.h": "c"
     }
 }
