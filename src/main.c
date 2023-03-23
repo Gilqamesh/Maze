@@ -25,6 +25,10 @@ static void maze__render(struct maze* self, struct window* window, struct ui_gro
                     struct v2r32 entry_p = v2r32(c * entry_dims.x + entry_offset.x, r * entry_dims.y + entry_offset.y);
                     window__draw_rectangle(window, entry_p, entry_dims, COLOR_RED);
                 } break ;
+                case MAZE_ENTRY_ROOM_2: {
+                    struct v2r32 entry_p = v2r32(c * entry_dims.x + entry_offset.x, r * entry_dims.y + entry_offset.y);
+                    window__draw_rectangle(window, entry_p, entry_dims, COLOR_GREEN);
+                } break ;
                 case MAZE_ENTRY_WALL: {
                     struct v2r32 entry_p = v2r32(c * entry_dims.x + entry_offset.x, r * entry_dims.y + entry_offset.y);
                     window__draw_rectangle(window, entry_p, entry_dims, COLOR_BLACK);
@@ -81,6 +85,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
     }
 
     maze__build(&maze);
+    // maze__build2(&maze);
 
     window__create(&window, app_handle, "Maze generator", v2u32(400, 300), v2u32(800, 600));
 

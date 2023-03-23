@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Windows.h>
+
+// TOOD(david): replace libc with own implementation
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -26,5 +28,6 @@ typedef double r64;
 enum APP_ERROR {
     APP_ERROR_WINDOW_CALLBACK,
     APP_ERROR_WM_CREATE,
-    APP_ERROR_INVALID_CODE_PATH
+    APP_ERROR_INVALID_CODE_PATH,
+    APP_ERROR_ALLOC_FAIL
 };

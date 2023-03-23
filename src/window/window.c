@@ -155,6 +155,18 @@ bool window__is_key_down(struct window* self, enum key key) {
 }
 
 void window__clear_screen(struct window* self, enum color color) {
+    window__draw_rectangle(
+        self,
+        v2r32(0.0f, 0.0f),
+        v2r32(self->frame_buffer.dims.x, self->frame_buffer.dims.y),
+        color
+    );
+}
+
+void window__draw_pixel(struct window* self, struct v2u32 position, enum color color) {
+    position = clamp__v2u32(v2u32(0, 0), position, self->frame_buffer.dims);
+
+    *((u32*) (self->frame_buffer.buffer) + position.y * self->frame_buffer.dims.x + position.x) = color;
 }
 
 void window__draw_rectangle(struct window* self, struct v2r32 position, struct v2r32 dims, enum color color) {
