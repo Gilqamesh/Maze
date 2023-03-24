@@ -1,15 +1,16 @@
-#pragma
+#pragma once
 
 #include "world_defs.h"
 
 #include "world_grid.h"
 
 struct world {
-    struct world_grid world_grid_hash[4096];
+    struct world_grid** world_grids;
+    u32 world_grids_size;
 };
 
-void world__create(struct world* world);
+DLLEXPORT void world__create(struct world* self);
 
-void world__destroy(struct world* world);
+DLLEXPORT void world__destroy(struct world* self);
 
-void world__get_grid(struct world* world, struct world_grid_index index);
+DLLEXPORT struct world_grid* world__get_grid(struct world* self, struct v2i32 index);

@@ -5,22 +5,35 @@
 #include "entity.h"
 #include "../math/v2i32.h"
 
-struct world_grid_index {
-    struct v2i32 p;
-};
-
 /*
     Regarding world_grid's implicit coordinate system:
     Center point is (0, 0).
 */
 struct world_grid {
-    struct entity** entities;
-    u32 entities_size;
+    struct entity** entities; // hash table
+    u32 entities_size; // hash table size
     u32 entities_fill;
 
-    struct world_grid* next; // in case there is a collision in the hash-table that stores it
-
-    struct world_grid_index index;
+    struct v2i32 grid_index;
 };
 
-void world_grid__create(struct world_grid* self, struct world_grid_index index);
+static inline struct v2r32 world_grid__dims(void) {
+    return v2r32(
+        world__meters_to_pixels(16.0f),
+        world__meters_to_pixels(16.0f)
+    );
+}
+
+DLLEXPORT struct world_grid* world_grid__create(struct v2i32 grid_index);
+
+DLLEXPORT void world_grid__destroy(struct world_grid* self);
+
+// @brief adds an entity to the world_grid
+DLLEXPORT void world_grid__add_entity(struct world_grid* self, struct entity* entity);
+// @brief removes an entity from the world_grid
+DLLEXPORT void world_grid__remove_entity(struct world_grid* self, struct entity* entity);
+
+// @param hash_table_size must be a power of 2
+static inline u32 world_grid__hash(struct v2i32 grid_index, u32 hash_table_size) {
+    return ((u32) grid_index.x * 7 + (u32) grid_index.y * 9) & hash_table_size;
+}

@@ -13,40 +13,26 @@
 */
 
 struct entity {
-    struct world_position center_p;
+    struct world_position p;
 
     struct v2u32 bounding_box_dims;
 };
 
-/*
+DLLEXPORT struct entity* entity__create(struct world_position p, struct v2u32 bounding_box_dims);
 
-struct world_grid_index {
-    struct v2i32 p;
-};
+DLLEXPORT void entity__destroy(struct entity* self);
 
-struct world_grid {
-    struct entity** entities;
-    u32 entities_size;
-    u32 entities_fill;
+// @param hash_table_size must be a power of 2
+static inline u32 entity__hash(struct entity* self, u32 hash_table_size) {
+#pragma warning(push)
+#pragma warning(disable: 4311)
+    return ((u32) self * 7) & hash_table_size;
+#pragma warning(pop)
+}
 
-    struct world_grid* next; // in case there is a collision in the hash-table that stores it
-
-    struct world_grid_index index;
-};
-
-struct world_position {
-    struct v2i32 global_p;
-    struct v2r32 local_p;
-};
-
-struct entity {
-    struct world_position center_p;
-
-    struct v2u32 bounding_box_dims;
-};
-
-struct world {
-    struct world_grid world_grid_hash[4096];
-};
-
-*/
+static inline struct v2u32 entity__average_dims(void) {
+    return v2u32(
+        world__meters_to_pixels(0.2f),
+        world__meters_to_pixels(0.2f)
+    );
+}

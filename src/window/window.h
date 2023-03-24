@@ -24,7 +24,6 @@ DLLEXPORT bool window__init_module(struct window* self, struct console* console)
 DLLEXPORT void window__deinit_module(struct window* self);
 
 // @brief creates a window
-// @note can only have one for this short demo
 DLLEXPORT bool window__create(struct window* self, HINSTANCE app_handle, const char* window_name, struct v2u32 window_pos, struct v2u32 window_dims);
 DLLEXPORT void window__destroy(struct window* self);
 

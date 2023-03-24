@@ -15,3 +15,7 @@ static inline struct v2i32 v2i32(i32 x, i32 y) {
 static inline struct v2i32 v2i32__scale(struct v2i32 v, i32 s) {
     return v2i32(v.x * s, v.y * s);
 }
+
+static inline bool v2i32__is_equal(struct v2i32 v1, struct v2i32 v2) {
+    return v1.x == v2.x && v1.y == v2.y;
+}

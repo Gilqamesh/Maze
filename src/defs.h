@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <assert.h>
 
 typedef uint64_t u64;
 typedef uint32_t u32;
@@ -29,5 +30,6 @@ enum APP_ERROR {
     APP_ERROR_WINDOW_CALLBACK,
     APP_ERROR_WM_CREATE,
     APP_ERROR_INVALID_CODE_PATH,
-    APP_ERROR_ALLOC_FAIL
+    APP_ERROR_ALLOC_FAIL,
+    APP_ERROR_RAN_OUT_OF_MEMORY
 };
