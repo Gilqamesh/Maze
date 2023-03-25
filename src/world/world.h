@@ -13,4 +13,4 @@ DLLEXPORT void world__create(struct world* self);
 
 DLLEXPORT void world__destroy(struct world* self);
 
-DLLEXPORT struct world_grid* world__get_grid(struct world* self, struct v2i32 index);
+DLLEXPORT struct world_grid* world__get_grid(struct world* self, struct v2i32 global_p);

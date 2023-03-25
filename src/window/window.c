@@ -170,12 +170,15 @@ void window__draw_pixel(struct window* self, struct v2u32 position, enum color c
 }
 
 void window__draw_rectangle(struct window* self, struct v2r32 position, struct v2r32 dims, enum color color) {
-    // TODO(david): write renderer instead of messing with coordinates in drawing routines
-    struct v2u32 start_p = v2u32((u32)round(position.x), (u32)round(position.y));
-    start_p = clamp__v2u32(v2u32(0, 0), start_p, v2u32(self->frame_buffer.dims.x, self->frame_buffer.dims.y));
+    struct v2u32 start_p = v2u32(
+        (u32) round(clamp__r32(0.0f, position.x, (r32) self->frame_buffer.dims.x - 1)),
+        (u32) round(clamp__r32(0.0f, position.y, (r32) self->frame_buffer.dims.y - 1))
+    );
 
-    struct v2u32 end_p = v2u32((u32)round(position.x + dims.x), (u32)round(position.y + dims.y));
-    end_p = clamp__v2u32(v2u32(0, 0), end_p, v2u32(self->frame_buffer.dims.x, self->frame_buffer.dims.y));
+    struct v2u32 end_p = v2u32(
+        (u32) round(clamp__r32(0.0f, position.x + dims.x, (r32) self->frame_buffer.dims.x - 1)),
+        (u32) round(clamp__r32(0.0f, position.y + dims.y, (r32) self->frame_buffer.dims.y - 1))
+    );
 
     struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
 
@@ -191,9 +194,8 @@ void window__draw_rectangle(struct window* self, struct v2r32 position, struct v
 }
 
 void window__draw_bitmap(struct window* self, struct v2u32 position, struct bitmap* bitmap) {
-    // TODO(david): write renderer instead of messing with coordinates in drawing routines
-    struct v2u32 start_p = clamp__v2u32(v2u32(0, 0), position, self->frame_buffer.dims);
-    struct v2u32 end_p   = clamp__v2u32(v2u32(0, 0), v2u32(start_p.x + bitmap->dims.x, start_p.y + bitmap->dims.y), self->frame_buffer.dims);
+    struct v2u32 start_p = clamp__v2u32(v2u32(0, 0), position, v2u32(self->frame_buffer.dims.x - 1, self->frame_buffer.dims.y - 1));
+    struct v2u32 end_p   = clamp__v2u32(v2u32(0, 0), v2u32(start_p.x + bitmap->dims.x, start_p.y + bitmap->dims.y), v2u32(self->frame_buffer.dims.x - 1, self->frame_buffer.dims.y - 1));
 
     struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
 

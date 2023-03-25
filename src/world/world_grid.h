@@ -14,7 +14,7 @@ struct world_grid {
     u32 entities_size; // hash table size
     u32 entities_fill;
 
-    struct v2i32 grid_index;
+    struct v2i32 global_p;
 };
 
 static inline struct v2r32 world_grid__dims(void) {
@@ -24,7 +24,7 @@ static inline struct v2r32 world_grid__dims(void) {
     );
 }
 
-DLLEXPORT struct world_grid* world_grid__create(struct v2i32 grid_index);
+DLLEXPORT struct world_grid* world_grid__create(struct v2i32 global_p);
 
 DLLEXPORT void world_grid__destroy(struct world_grid* self);
 
@@ -34,6 +34,6 @@ DLLEXPORT void world_grid__add_entity(struct world_grid* self, struct entity* en
 DLLEXPORT void world_grid__remove_entity(struct world_grid* self, struct entity* entity);
 
 // @param hash_table_size must be a power of 2
-static inline u32 world_grid__hash(struct v2i32 grid_index, u32 hash_table_size) {
-    return ((u32) grid_index.x * 7 + (u32) grid_index.y * 9) & hash_table_size;
+static inline u32 world_grid__hash(struct v2i32 global_p, u32 hash_table_size) {
+    return ((u32) global_p.x * 7 + (u32) global_p.y * 9) & hash_table_size;
 }

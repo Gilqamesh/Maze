@@ -12,7 +12,17 @@
     During simulation, the entity's relative position to the simulation's center will be calculated.
 */
 
+enum entity_flags {
+    ENTITY_FLAGS__IS_IN_SIM_REGION    = 1 << 0,
+    ENTITY_FLAGS__IS_IN_RENDER_REGION = 1 << 1,
+};
+
 struct entity {
+    struct {
+        u32 flags;
+        struct v2r32 relative_p;
+    } sim_region_relative; // transient values set by set region
+
     struct world_position p;
 
     struct v2u32 bounding_box_dims;
@@ -35,4 +45,16 @@ static inline struct v2u32 entity__average_dims(void) {
         world__meters_to_pixels(0.2f),
         world__meters_to_pixels(0.2f)
     );
+}
+
+static inline void entity__flag_set(struct entity* entity, enum entity_flags flag, bool is_true) {
+    if (is_true) {
+        entity->sim_region_relative.flags |= flag;
+    } else {
+        entity->sim_region_relative.flags &= ~flag;
+    }
+}
+
+static inline bool entity__flag_is_set(struct entity* entity, enum entity_flags flag) {
+    return entity->sim_region_relative.flags & flag;
 }

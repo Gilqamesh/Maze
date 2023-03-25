@@ -4,7 +4,8 @@
 
 #include "world.h"
 #include "entity.h"
-#include "../math/v2u32.h"
+#include "renderer.h"
+#include "../math/v2r32.h"
 
 /*
     -------------------------------------------------------------------
@@ -33,16 +34,21 @@
 
 struct sim_region {
     struct world_position center_p;
-    struct v2u32 dims;
+    struct v2r32 half_dims;
 };
 
-typedef void (*sim_region__entity_processor_callback)(struct entity** entities, u32 entities_size, struct world_position relative_p);
+typedef void (*sim_region__entity_processor_callback)(
+    struct entity** entities,
+    struct renderer* renderer,
+    u32 entities_size
+);
 
 // @brief pulls in all the entities from surrounding world_grids into the sim_region
 DLLEXPORT void sim_region__routine(
     struct sim_region* self,
     struct world* world,
+    struct renderer* renderer,
     sim_region__entity_processor_callback entity_processor_callback,
     struct world_position p,
-    struct v2u32 dims
+    struct v2r32 half_dims
 );

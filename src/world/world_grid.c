@@ -6,7 +6,7 @@
 
 #define ENTITIES_START_SIZE 16
 
-struct world_grid* world_grid__create(struct v2i32 grid_index) {
+struct world_grid* world_grid__create(struct v2i32 global_p) {
     struct world_grid* result = (struct world_grid*) calloc(1, sizeof(*result));
 
     result->entities_size = ENTITIES_START_SIZE;
@@ -16,7 +16,7 @@ struct world_grid* world_grid__create(struct v2i32 grid_index) {
         ExitProcess(APP_ERROR_ALLOC_FAIL);
     }
 
-    result->grid_index = grid_index;
+    result->global_p = global_p;
 
     return result;
 }

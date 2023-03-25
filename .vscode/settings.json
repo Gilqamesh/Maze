@@ -2,6 +2,7 @@
     "files.associations": {
         "random": "c",
         "cmath": "c",
-        "math_defs.h": "c"
+        "math_defs.h": "c",
+        "world_position.h": "c"
     }
 }
