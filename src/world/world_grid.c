@@ -88,17 +88,17 @@ void world_grid__remove_entity(struct world_grid* self, struct entity* entity) {
         // note: move the entities from the upper half to the lower half
         for (u32 entity_index = self->entities_fill; entity_index < self->entities_size; ++entity_index) {
             struct entity* cur_entity = self->entities[entity_index];
-            u32 hash_index = entity__hash(cur_entity, new_entities_size);
+            u32 cur_hash_index = entity__hash(cur_entity, new_entities_size);
 
             bool found_slot = false;
-            for (u32 new_entity_index = hash_index; found_slot == false && new_entity_index < new_entities_size; ++new_entity_index) {
+            for (u32 new_entity_index = cur_hash_index; found_slot == false && new_entity_index < new_entities_size; ++new_entity_index) {
                 if (self->entities[new_entity_index] == NULL) {
                     self->entities[new_entity_index] = cur_entity;
                     found_slot = true;
                 }
             }
 
-            for (u32 new_entity_index = 0; found_slot == false && new_entity_index < hash_index; ++new_entity_index) {
+            for (u32 new_entity_index = 0; found_slot == false && new_entity_index < cur_hash_index; ++new_entity_index) {
                 if (self->entities[new_entity_index] == NULL) {
                     self->entities[new_entity_index] = cur_entity;
                     found_slot = true;
