@@ -3,6 +3,7 @@
         "random": "c",
         "cmath": "c",
         "math_defs.h": "c",
-        "world_position.h": "c"
+        "world_position.h": "c",
+        "input_state.h": "c"
     }
 }

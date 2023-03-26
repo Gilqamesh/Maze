@@ -1,6 +1,7 @@
 #include "window.h"
 #include "window_utils.h"
 #include "../math/clamp.h"
+#include "../math/abs_diff.h"
 #include "../readers/bitmap.h"
 
 bool window__init_module(struct window* self, struct console* console) {
@@ -16,17 +17,14 @@ void window__deinit_module(struct window* self) {
 bool window__create(struct window* self, HINSTANCE app_handle, const char* window_name, struct v2u32 window_pos, struct v2u32 window_dims) {
     self->destroy_next_frame = false;
     self->dims               = window_dims;
-    for (u32 button_index = 0; button_index < ARRAY_SIZE(self->input_state.buttons); ++button_index) {
-        self->input_state.buttons[button_index].half_transition_count = 0;
-        self->input_state.buttons[button_index].ended_down = false;
-    }
+    memset(&self->input_state, 0, sizeof(self->input_state));
 
     if (bit_buffer__create(&self->frame_buffer, window_dims) == false) {
         return false;
     }
 
     WNDCLASSA window_class = { 0 };
-    window_class.style = CS_DBLCLKS;
+    window_class.style = 0;
     window_class.lpfnWndProc = &_window_callback;
     window_class.hInstance = app_handle;
 
@@ -96,7 +94,8 @@ void window__show(struct window* self) {
 }
 
 void window__poll_inputs(struct window* self) {
-    self->mouse_p_prev = self->mouse_p;
+    self->input_state.mouse.mouse_p_prev = self->input_state.mouse.mouse_p;
+    self->input_state.mouse.mouse_wheel_delta = 0;
 
     for (u32 button_index = 0; button_index < ARRAY_SIZE(self->input_state.buttons); ++button_index) {
         self->input_state.buttons[button_index].half_transition_count = 0;
@@ -133,15 +132,26 @@ void window__end_draw(struct window* self) {
 }
 
 struct v2u32 window__mouse_get_position(struct window* self) {
-    return self->mouse_p;
+    return self->input_state.mouse.mouse_p;
 }
 
-u32 window__is_key_pressed(struct window* self, enum key key) {
+struct v2i32 window__mouse_get_delta(struct window* self) {
+    return v2i32(
+        (i32) self->input_state.mouse.mouse_p.x - (i32) self->input_state.mouse.mouse_p_prev.x,
+        (i32) self->input_state.mouse.mouse_p.y - (i32) self->input_state.mouse.mouse_p_prev.y
+    );
+}
+
+i32 window__mouse_get_wheel_delta(struct window* self) {
+    return self->input_state.mouse.mouse_wheel_delta;
+}
+
+u32 window__key_is_pressed(struct window* self, enum key key) {
     u32 result = 0;
 
     const u32 half_transition_count = self->input_state.buttons[key].half_transition_count;
 
-    if (window__is_key_down(self, key)) {
+    if (window__key_is_down(self, key)) {
         result = ((half_transition_count + 1) >> 1);
     } else {
         result = (half_transition_count >> 1);
@@ -150,7 +160,7 @@ u32 window__is_key_pressed(struct window* self, enum key key) {
     return result;
 }
 
-bool window__is_key_down(struct window* self, enum key key) {
+bool window__key_is_down(struct window* self, enum key key) {
     return self->input_state.buttons[key].ended_down;
 }
 
@@ -169,35 +179,35 @@ void window__draw_pixel(struct window* self, struct v2u32 position, enum color c
     *((u32*) (self->frame_buffer.buffer) + position.y * self->frame_buffer.dims.x + position.x) = color;
 }
 
-void window__draw_rectangle(struct window* self, struct v2r32 position, struct v2r32 dims, enum color color) {
+void window__draw_rectangle(struct window* self, struct v2r32 top_left_p, struct v2r32 dims, enum color color) {
     struct v2u32 start_p = v2u32(
-        (u32) round(clamp__r32(0.0f, position.x, (r32) self->frame_buffer.dims.x - 1)),
-        (u32) round(clamp__r32(0.0f, position.y, (r32) self->frame_buffer.dims.y - 1))
+        (u32) round(clamp__r32(0.0f, top_left_p.x, (r32) self->frame_buffer.dims.x - 1.0f)),
+        (u32) round(clamp__r32(0.0f, top_left_p.y, (r32) self->frame_buffer.dims.y - 1.0f))
     );
 
     struct v2u32 end_p = v2u32(
-        (u32) round(clamp__r32(0.0f, position.x + dims.x, (r32) self->frame_buffer.dims.x - 1)),
-        (u32) round(clamp__r32(0.0f, position.y + dims.y, (r32) self->frame_buffer.dims.y - 1))
+        (u32) round(clamp__r32(0.0f, top_left_p.x + dims.x, (r32) self->frame_buffer.dims.x - 1.0f)),
+        (u32) round(clamp__r32(0.0f, top_left_p.y + dims.y, (r32) self->frame_buffer.dims.y - 1.0f))
     );
 
-    struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
+    struct v2u32 clamped_dims = abs_diff__v2u32(start_p, end_p);
 
     u32  bit_buffer_stride = self->frame_buffer.dims.x;
     u32* bit_buffer_p = ((u32*) self->frame_buffer.buffer) + start_p.y * bit_buffer_stride + start_p.x;
 
-    for (u32 row_offset = 0; row_offset < clamped_dims.y; ++row_offset) {
-        for (u32 col_offset = 0; col_offset < clamped_dims.x; ++col_offset) {
+    for (u32 row_offset = 0; row_offset <= clamped_dims.y; ++row_offset) {
+        for (u32 col_offset = 0; col_offset <= clamped_dims.x; ++col_offset) {
             *(bit_buffer_p + col_offset) = *(u32 *)&color;
         }
         bit_buffer_p += bit_buffer_stride;
     }
 }
 
-void window__draw_bitmap(struct window* self, struct v2u32 position, struct bitmap* bitmap) {
-    struct v2u32 start_p = clamp__v2u32(v2u32(0, 0), position, v2u32(self->frame_buffer.dims.x - 1, self->frame_buffer.dims.y - 1));
+void window__draw_bitmap(struct window* self, struct v2u32 top_left_p, struct bitmap* bitmap) {
+    struct v2u32 start_p = clamp__v2u32(v2u32(0, 0), top_left_p, v2u32(self->frame_buffer.dims.x - 1, self->frame_buffer.dims.y - 1));
     struct v2u32 end_p   = clamp__v2u32(v2u32(0, 0), v2u32(start_p.x + bitmap->dims.x, start_p.y + bitmap->dims.y), v2u32(self->frame_buffer.dims.x - 1, self->frame_buffer.dims.y - 1));
 
-    struct v2u32 clamped_dims = v2u32(end_p.x - start_p.x, end_p.y - start_p.y);
+    struct v2u32 clamped_dims = abs_diff__v2u32(start_p, end_p);
 
     u32  bit_buffer_stride = self->frame_buffer.dims.x;
     u32* bit_buffer_p = (u32*) self->frame_buffer.buffer + start_p.y * bit_buffer_stride + start_p.x;

@@ -1,7 +1,10 @@
 #include "renderer.h"
 
-void renderer__create(struct renderer* self, struct window* window, struct world_position center_p, struct v2r32 half_dims) {
+#include "world_grid.h"
+
+void renderer__create(struct renderer* self, struct window* window, struct world* world, struct world_position center_p, struct v2r32 half_dims) {
     self->window = window;
+    self->world = world;
     self->center_p = center_p;
     self->half_dims = half_dims;
 }
@@ -19,5 +22,118 @@ void renderer__push_pixel(struct renderer* self, struct v2r32 pixel, enum color 
 }
 
 void renderer__push_rectangle(struct renderer* self, struct v2r32 position, struct v2r32 dims, enum color color) {
-    window__draw_rectangle(self->window, position, dims, color);
+    window__draw_rectangle(self->window, v2r32(
+        self->half_dims.x + position.x,
+        self->half_dims.y + position.y
+    ), dims, color);
+}
+
+void renderer__push_entities(struct renderer* self) {
+    struct v2r32 world_grid_dims = world_grid__dims();
+
+    struct world_position start_world_p = world_position__from_relative_p(
+        v2r32(-self->half_dims.x, -self->half_dims.y),
+        self->center_p
+    );
+    struct world_position end_world_p = world_position__from_relative_p(
+        v2r32(self->half_dims.x, self->half_dims.y),
+        self->center_p
+    );
+
+    for (i32 world_grid_y = start_world_p.global_p.y; world_grid_y <= end_world_p.global_p.y; ++world_grid_y) {
+        for (i32 world_grid_x = start_world_p.global_p.x; world_grid_x <= end_world_p.global_p.x; ++world_grid_x) {
+            struct v2i32 grid_p = v2i32(world_grid_x, world_grid_y);
+            struct world_grid* grid = world__get_grid(self->world, grid_p);
+            struct entity** entities = grid->entities;
+            for (u32 entity_index = 0; entity_index < grid->entities_size; ++entity_index) {
+                struct entity* entity = entities[entity_index];
+                if (entity != NULL) {
+                    struct v2r32 entity_p = world_position__to_relative_p(entity->p, self->center_p);
+                    if (v2r32__is_in_half_dims(entity_p, self->half_dims)) {
+                        renderer__push_rectangle(
+                            self,
+                            entity_p,
+                            v2r32(5.0f, 5.0f),
+                            COLOR_RED
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+static void renderer__draw_world_grids(struct renderer* self) {
+    struct v2r32 world_grid_dims = world_grid__dims();
+
+    struct world_position start_world_p = world_position__from_relative_p(
+        v2r32(-self->half_dims.x, -self->half_dims.y),
+        self->center_p
+    );
+    struct world_position end_world_p = world_position__from_relative_p(
+        v2r32(self->half_dims.x, self->half_dims.y),
+        self->center_p
+    );
+
+    for (i32 world_grid_y = start_world_p.global_p.y; world_grid_y <= end_world_p.global_p.y; ++world_grid_y) {
+        for (i32 world_grid_x = start_world_p.global_p.x; world_grid_x <= end_world_p.global_p.x; ++world_grid_x) {
+            struct v2i32 grid_p = v2i32(world_grid_x, world_grid_y);
+            struct world_grid* grid = world__get_grid(self->world, grid_p);
+            struct world_position grid_world_p = world_position(
+                grid->global_p,
+                v2r32(0.0f, 0.0f)
+            );
+            struct v2r32 grid_relative_p = world_position__to_relative_p(grid_world_p, self->center_p);
+            struct v2r32 top_left_p = v2r32(
+                grid_relative_p.x - world_grid_dims.x / 2.0f,
+                grid_relative_p.y - world_grid_dims.y / 2.0f
+            );
+            struct v2r32 top_right_p = v2r32(
+                grid_relative_p.x + world_grid_dims.x / 2.0f,
+                grid_relative_p.y - world_grid_dims.y / 2.0f
+            );
+            struct v2r32 bottom_left_p = v2r32(
+                grid_relative_p.x - world_grid_dims.x / 2.0f,
+                grid_relative_p.y + world_grid_dims.y / 2.0f
+            );
+            struct v2r32 bottom_right_p = v2r32(
+                grid_relative_p.x + world_grid_dims.x / 2.0f,
+                grid_relative_p.y + world_grid_dims.y / 2.0f
+            );
+            // top_left -> top_right
+            renderer__push_rectangle(
+                self,
+                top_left_p,
+                v2r32(top_right_p.x - top_left_p.x, 2.0f),
+                COLOR_GREEN
+            );
+            // top_right -> bottom_right
+            renderer__push_rectangle(
+                self,
+                top_right_p,
+                v2r32(2.0f, bottom_right_p.y - top_right_p.y),
+                COLOR_GREEN
+            );
+            // top_left -> bottom_left
+            renderer__push_rectangle(
+                self,
+                top_left_p,
+                v2r32(2.0f, bottom_left_p.y - top_left_p.y),
+                COLOR_GREEN
+            );
+            // bottom_left -> bottom_right
+            renderer__push_rectangle(
+                self,
+                bottom_left_p,
+                v2r32(bottom_right_p.x - bottom_left_p.x, 2.0f),
+                COLOR_GREEN
+            );
+        }
+    }
+}
+
+void renderer__render(struct renderer* self) {
+    // todo: render all pushed entities
+
+    renderer__draw_world_grids(self);
 }

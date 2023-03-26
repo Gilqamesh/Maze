@@ -3,6 +3,7 @@
 #include "world_defs.h"
 
 #include "world_grid.h"
+#include "entity.h"
 
 struct world {
     struct world_grid** world_grids;

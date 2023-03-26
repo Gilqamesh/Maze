@@ -39,9 +39,13 @@ LRESULT CALLBACK _window_callback(HWND window_handle, UINT message_code, WPARAM 
         case WM_DESTROY: {
             PostQuitMessage(0);
         } break ;
+        case WM_MOUSEWHEEL: {
+            struct window* window = _window_get_from_handle(window_handle);
+            window->input_state.mouse.mouse_wheel_delta = GET_WHEEL_DELTA_WPARAM(w_param);
+        } break ;
         case WM_MOUSEMOVE: {
             struct window* window = _window_get_from_handle(window_handle);
-            window->mouse_p = v2u32(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
+            window->input_state.mouse.mouse_p = v2u32(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
         } break ;
         case WM_LBUTTONDOWN: {
             SetCapture(window_handle);

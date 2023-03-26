@@ -7,8 +7,10 @@ void world__create(struct world* self) {
 
 void world__destroy(struct world* self) {
     for (u32 grid_index = 0; grid_index < self->world_grids_size; ++grid_index) {
-        world_grid__destroy(self->world_grids[grid_index]);
-        free(self->world_grids[grid_index]);
+        if (self->world_grids[grid_index] != NULL) {
+            world_grid__destroy(self->world_grids[grid_index]);
+            free(self->world_grids[grid_index]);
+        }
     }
 
     free(self->world_grids);

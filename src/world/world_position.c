@@ -35,3 +35,7 @@ struct world_position world_position__from_relative_p(struct v2r32 p, struct wor
 
     return result;
 }
+
+struct world_position world_position__add_relative_p(struct world_position p, struct v2r32 relative_p) {
+    return world_position__from_relative_p(relative_p, p);
+}

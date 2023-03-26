@@ -13,8 +13,7 @@
 */
 
 enum entity_flags {
-    ENTITY_FLAGS__IS_IN_SIM_REGION    = 1 << 0,
-    ENTITY_FLAGS__IS_IN_RENDER_REGION = 1 << 1,
+    ENTITY_FLAGS__IS_IN_SIM_REGION    = 1 << 0
 };
 
 struct entity {

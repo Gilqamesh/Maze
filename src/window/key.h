@@ -26,12 +26,3 @@ enum key {
 
     _KEY_SIZE
 };
-
-struct button_state {
-    u32  half_transition_count;
-    bool ended_down;
-};
-
-struct input_state {
-    struct button_state buttons[_KEY_SIZE];
-};
