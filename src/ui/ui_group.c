@@ -40,7 +40,7 @@ void ui_group__update_and_render(struct ui_group* self) {
     struct v2r32 ui_group_scale   = v2r32((r32) self->window->dims.x / (r32) self->original_window_dims.x, (r32) self->window->dims.y / (r32) self->original_window_dims.y);
     struct v2r32 cur_p            = v2r32(self->p.x * ui_group_scale.x, self->p.y * ui_group_scale.y);
     struct v2r32 cur_dims         = v2r32(self->dims.x * ui_group_scale.x, self->dims.y * ui_group_scale.y);
-    bool is_mouse_lbutton_pressed = window__is_key_pressed(self->window, MOUSE_LBUTTON);
+    bool is_mouse_lbutton_pressed = window__key_is_pressed(self->window, MOUSE_LBUTTON);
     if (
         mp.x >= cur_p.x &&
         mp.x <= cur_p.x + cur_dims.x &&

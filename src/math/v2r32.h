@@ -12,8 +12,22 @@ static inline struct v2r32 v2r32(r32 x, r32 y) {
     return v;
 }
 
-static inline struct v2r32 v2r32__scale(struct v2r32 v, r32 s) {
+static inline struct v2r32 v2r32__scale_r32(struct v2r32 v, r32 s) {
     return v2r32(v.x * s, v.y * s);
+}
+
+static inline struct v2r32 v2r32__scale_v2r32(struct v2r32 v, struct v2r32 s) {
+    return v2r32(
+        v.x * s.x,
+        v.y * s.y
+    );
+}
+
+static inline struct v2r32 v2r32__add_v2r32(struct v2r32 v, struct v2r32 w) {
+    return v2r32(
+        v.x + w.x,
+        v.y + w.y
+    );
 }
 
 static inline bool v2r32__is_in_half_dims(struct v2r32 v, struct v2r32 half_dims) {

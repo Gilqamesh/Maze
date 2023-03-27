@@ -148,11 +148,11 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
         // u64 time_start = __rdtsc();
         window__poll_inputs(&window);
 
-        if (window__is_key_pressed(&window, KEY_ESCAPE)) {
+        if (window__key_is_pressed(&window, KEY_ESCAPE)) {
             window__close_next_frame(&window);
         }
 
-        if (window__is_key_pressed(&window, KEY_RIGHT)) {
+        if (window__key_is_pressed(&window, KEY_RIGHT)) {
             maze__build_advance(&maze);
         }
 

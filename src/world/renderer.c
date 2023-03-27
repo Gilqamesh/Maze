@@ -65,6 +65,12 @@ void renderer__push_entities(struct renderer* self) {
 
 static void renderer__draw_world_grids(struct renderer* self) {
     struct v2r32 world_grid_dims = world_grid__dims();
+    struct v2r32 render_ratio = v2r32(
+        2.0f * self->half_dims.x / (r32) self->window->dims.x,
+        2.0f * self->half_dims.y / (r32) self->window->dims.y
+    );
+    struct v2r32 world_grid_half_dims = v2r32__scale_r32(world_grid_dims, 0.5f);
+    world_grid_half_dims = v2r32__scale_v2r32(world_grid_half_dims, render_ratio);
 
     struct world_position start_world_p = world_position__from_relative_p(
         v2r32(-self->half_dims.x, -self->half_dims.y),
@@ -84,22 +90,26 @@ static void renderer__draw_world_grids(struct renderer* self) {
                 v2r32(0.0f, 0.0f)
             );
             struct v2r32 grid_relative_p = world_position__to_relative_p(grid_world_p, self->center_p);
-            struct v2r32 top_left_p = v2r32(
-                grid_relative_p.x - world_grid_dims.x / 2.0f,
-                grid_relative_p.y - world_grid_dims.y / 2.0f
-            );
-            struct v2r32 top_right_p = v2r32(
-                grid_relative_p.x + world_grid_dims.x / 2.0f,
-                grid_relative_p.y - world_grid_dims.y / 2.0f
-            );
-            struct v2r32 bottom_left_p = v2r32(
-                grid_relative_p.x - world_grid_dims.x / 2.0f,
-                grid_relative_p.y + world_grid_dims.y / 2.0f
-            );
-            struct v2r32 bottom_right_p = v2r32(
-                grid_relative_p.x + world_grid_dims.x / 2.0f,
-                grid_relative_p.y + world_grid_dims.y / 2.0f
-            );
+            struct v2r32 top_left_p = v2r32__scale_v2r32(grid_relative_p, render_ratio);
+            top_left_p = v2r32__add_v2r32(top_left_p, v2r32(
+                -world_grid_half_dims.x,
+                -world_grid_half_dims.y
+            ));
+            struct v2r32 top_right_p = v2r32__scale_v2r32(grid_relative_p, render_ratio);
+            top_right_p = v2r32__add_v2r32(top_right_p, v2r32(
+                world_grid_half_dims.x,
+                -world_grid_half_dims.y
+            ));
+            struct v2r32 bottom_left_p = v2r32__scale_v2r32(grid_relative_p, render_ratio);
+            bottom_left_p = v2r32__add_v2r32(bottom_left_p, v2r32(
+                -world_grid_half_dims.x,
+                world_grid_half_dims.y
+            ));
+            struct v2r32 bottom_right_p = v2r32__scale_v2r32(grid_relative_p, render_ratio);
+            bottom_right_p = v2r32__add_v2r32(bottom_right_p, v2r32(
+                world_grid_half_dims.x,
+                world_grid_half_dims.y
+            ));
             // top_left -> top_right
             renderer__push_rectangle(
                 self,
