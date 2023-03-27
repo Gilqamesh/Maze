@@ -23,21 +23,33 @@ void renderer__push_pixel(struct renderer* self, struct v2r32 pixel, enum color 
 
 void renderer__push_rectangle(struct renderer* self, struct v2r32 position, struct v2r32 dims, enum color color) {
     window__draw_rectangle(self->window, v2r32(
-        self->half_dims.x + position.x,
-        self->half_dims.y + position.y
+        (r32) self->window->dims.x / 2.0f + position.x,
+        (r32) self->window->dims.y / 2.0f + position.y
     ), dims, color);
 }
 
 void renderer__push_entities(struct renderer* self) {
     struct v2r32 world_grid_dims = world_grid__dims();
+    struct v2r32 render_ratio = v2r32(
+        (r32) self->window->dims.x / 2.0f / self->half_dims.x,
+        (r32) self->window->dims.y / 2.0f / self->half_dims.y
+    );
+
+    struct v2r32 world_grid_half_dims = v2r32__scale_r32(world_grid_dims, 0.5f);
+    world_grid_half_dims = v2r32__scale_v2r32(world_grid_half_dims, render_ratio);
 
     struct world_position start_world_p = world_position__from_relative_p(
-        v2r32(-self->half_dims.x, -self->half_dims.y),
+        v2r32__scale_r32(self->half_dims, -1.0f),
         self->center_p
     );
     struct world_position end_world_p = world_position__from_relative_p(
-        v2r32(self->half_dims.x, self->half_dims.y),
+        self->half_dims,
         self->center_p
+    );
+
+    struct v2r32 line_thickness = v2r32(
+        render_ratio.x * 2.0f,
+        render_ratio.y * 2.0f
     );
 
     for (i32 world_grid_y = start_world_p.global_p.y; world_grid_y <= end_world_p.global_p.y; ++world_grid_y) {
@@ -49,11 +61,12 @@ void renderer__push_entities(struct renderer* self) {
                 struct entity* entity = entities[entity_index];
                 if (entity != NULL) {
                     struct v2r32 entity_p = world_position__to_relative_p(entity->p, self->center_p);
+                    entity_p = v2r32__scale_v2r32(entity_p, render_ratio);
                     if (v2r32__is_in_half_dims(entity_p, self->half_dims)) {
                         renderer__push_rectangle(
                             self,
                             entity_p,
-                            v2r32(5.0f, 5.0f),
+                            line_thickness,
                             COLOR_RED
                         );
                     }
@@ -66,18 +79,18 @@ void renderer__push_entities(struct renderer* self) {
 static void renderer__draw_world_grids(struct renderer* self) {
     struct v2r32 world_grid_dims = world_grid__dims();
     struct v2r32 render_ratio = v2r32(
-        2.0f * self->half_dims.x / (r32) self->window->dims.x,
-        2.0f * self->half_dims.y / (r32) self->window->dims.y
+        (r32) self->window->dims.x / 2.0f / self->half_dims.x,
+        (r32) self->window->dims.y / 2.0f / self->half_dims.y
     );
     struct v2r32 world_grid_half_dims = v2r32__scale_r32(world_grid_dims, 0.5f);
     world_grid_half_dims = v2r32__scale_v2r32(world_grid_half_dims, render_ratio);
 
     struct world_position start_world_p = world_position__from_relative_p(
-        v2r32(-self->half_dims.x, -self->half_dims.y),
+        v2r32__scale_r32(self->half_dims, -1.0f),
         self->center_p
     );
     struct world_position end_world_p = world_position__from_relative_p(
-        v2r32(self->half_dims.x, self->half_dims.y),
+        self->half_dims,
         self->center_p
     );
 
@@ -89,53 +102,54 @@ static void renderer__draw_world_grids(struct renderer* self) {
                 grid->global_p,
                 v2r32(0.0f, 0.0f)
             );
-            struct v2r32 grid_relative_p = world_position__to_relative_p(grid_world_p, self->center_p);
-            struct v2r32 top_left_p = v2r32__scale_v2r32(grid_relative_p, render_ratio);
-            top_left_p = v2r32__add_v2r32(top_left_p, v2r32(
+            struct v2r32 grid_center_p = world_position__to_relative_p(grid_world_p, self->center_p);
+            grid_center_p = v2r32__scale_v2r32(grid_center_p, render_ratio);
+            struct v2r32 top_left_p = v2r32__add_v2r32(grid_center_p, v2r32(
                 -world_grid_half_dims.x,
                 -world_grid_half_dims.y
             ));
-            struct v2r32 top_right_p = v2r32__scale_v2r32(grid_relative_p, render_ratio);
-            top_right_p = v2r32__add_v2r32(top_right_p, v2r32(
+            struct v2r32 top_right_p = v2r32__add_v2r32(grid_center_p, v2r32(
                 world_grid_half_dims.x,
                 -world_grid_half_dims.y
             ));
-            struct v2r32 bottom_left_p = v2r32__scale_v2r32(grid_relative_p, render_ratio);
-            bottom_left_p = v2r32__add_v2r32(bottom_left_p, v2r32(
+            struct v2r32 bottom_left_p = v2r32__add_v2r32(grid_center_p, v2r32(
                 -world_grid_half_dims.x,
                 world_grid_half_dims.y
             ));
-            struct v2r32 bottom_right_p = v2r32__scale_v2r32(grid_relative_p, render_ratio);
-            bottom_right_p = v2r32__add_v2r32(bottom_right_p, v2r32(
+            struct v2r32 bottom_right_p = v2r32__add_v2r32(grid_center_p, v2r32(
                 world_grid_half_dims.x,
                 world_grid_half_dims.y
             ));
+            struct v2r32 line_thickness = v2r32(
+                render_ratio.x * 2.0f,
+                render_ratio.y * 2.0f
+            );
             // top_left -> top_right
             renderer__push_rectangle(
                 self,
                 top_left_p,
-                v2r32(top_right_p.x - top_left_p.x, 2.0f),
+                v2r32(top_right_p.x - top_left_p.x, line_thickness.y),
                 COLOR_GREEN
             );
             // top_right -> bottom_right
             renderer__push_rectangle(
                 self,
                 top_right_p,
-                v2r32(2.0f, bottom_right_p.y - top_right_p.y),
+                v2r32(line_thickness.x, bottom_right_p.y - top_right_p.y),
                 COLOR_GREEN
             );
             // top_left -> bottom_left
             renderer__push_rectangle(
                 self,
                 top_left_p,
-                v2r32(2.0f, bottom_left_p.y - top_left_p.y),
+                v2r32(line_thickness.x, bottom_left_p.y - top_left_p.y),
                 COLOR_GREEN
             );
             // bottom_left -> bottom_right
             renderer__push_rectangle(
                 self,
                 bottom_left_p,
-                v2r32(bottom_right_p.x - bottom_left_p.x, 2.0f),
+                v2r32(bottom_right_p.x - bottom_left_p.x, line_thickness.y),
                 COLOR_GREEN
             );
         }
