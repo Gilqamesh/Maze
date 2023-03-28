@@ -15,6 +15,7 @@ set LFLAGS=^
     /INCREMENTAL:NO^
     /OPT:REF^
     /DEBUG^
+    window.lib^
     /PDB:%MODULE_NAME%.pdb
 
 cl %CFLAGS%^

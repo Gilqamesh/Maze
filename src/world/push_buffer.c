@@ -12,11 +12,17 @@ struct push_buffer_rectangle push_buffer_rectangle__create(
     result.center_p = center_p;
     result.half_dims = half_dims;
     result.color = color;
+
+    return result;
 }
 
 void push_buffer__create(struct push_buffer* self) {
     self->rectangles_size = PUSH_BUFFER_RECTANGLES_SIZE_START;
     self->rectangles_fill = 0;
+    self->rectangles = (struct push_buffer_rectangle*) malloc(self->rectangles_size * sizeof(*self->rectangles));
+    if (self->rectangles == NULL) {
+        ExitProcess(APP_ERROR_ALLOC_FAIL);
+    }
 }
 
 void push_buffer__destroy(struct push_buffer* self) {

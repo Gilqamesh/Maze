@@ -9,8 +9,6 @@ void sim_region__routine(
     struct world_position center_p,
     struct v2r32 half_dims
 ) {
-    struct v2r32 world_grid_dims = world_grid__dims();
-
     struct world_position start_world_p = world_position__from_relative_p(
         v2r32(-half_dims.x, -half_dims.y),
         center_p
@@ -26,7 +24,7 @@ void sim_region__routine(
             struct world_grid* grid = world__get_grid(world, grid_p);
             struct entity** entities = grid->entities;
 
-            // note: pull in entities from the grid that are still inside the sim_region's bounds
+            // note: pull in entities from the grid that are inside the sim_region's bounds
             for (u32 entity_index = 0; entity_index < grid->entities_size; ++entity_index) {
                 struct entity* entity = entities[entity_index];
                 if (entity != NULL) {

@@ -15,7 +15,7 @@
 */
 
 enum entity_flags {
-    ENTITY_FLAGS__IS_RENDEREABLE   = 1 << 0
+    ENTITY_FLAGS__TEMPORARY_UPDATE_FLAG = 1 << 0
 };
 
 struct entity {
@@ -24,16 +24,26 @@ struct entity {
         struct v2r32 relative_p; // relative to the sim_region's center_p
     } processor_callback_transient_values; // transient values set by set by the sim_region for the entity_processor_callback
 
+    struct v2r32 dp;
     u32 flags;
     struct world_position center_p;
     struct v2r32 bounding_box_half_dims;
     enum color color;
 };
 
-DLLEXPORT struct entity* entity__create_absolute(struct world_position center_p, struct v2r32 bounding_box_half_dims);
+DLLEXPORT struct entity* entity__create_absolute(
+    struct world_position center_p,
+    struct v2r32 bounding_box_half_dims,
+    enum color color
+);
 // @param center_p the entity's position relative to 'relative_p'
 // @param relative_p the relative position which 'center_p' is relative to
-DLLEXPORT struct entity* entity__create_relative(struct v2r32 center_p, struct world_position relative_p, struct v2r32 bounding_box_half_dims);
+DLLEXPORT struct entity* entity__create_relative(
+    struct v2r32 center_p,
+    struct world_position relative_p,
+    struct v2r32 bounding_box_half_dims,
+    enum color color
+);
 
 DLLEXPORT void entity__destroy(struct entity* self);
 
@@ -52,12 +62,12 @@ static inline struct v2u32 entity__average_dims(void) {
     );
 }
 
-static inline void entity__flag_set(struct entity* entity, enum entity_flags flag, bool is_true) {
-    if (is_true) {
-        entity->flags |= flag;
-    } else {
-        entity->flags &= ~flag;
-    }
+static inline void entity__flag_set(struct entity* entity, enum entity_flags flag) {
+    entity->flags |= flag;
+}
+
+static inline void entity__flag_clear(struct entity* entity, enum entity_flags flag, bool is_true) {
+    entity->flags &= ~flag;
 }
 
 static inline bool entity__flag_is_set(struct entity* entity, enum entity_flags flag) {
