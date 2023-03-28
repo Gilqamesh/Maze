@@ -62,6 +62,12 @@ static inline void camera_render_entity_processor_callback(
     }
 }
 
+bool camera__is_p_in_window_client_area(struct camera* self, struct v2r32 p) {
+    struct v2r32 p_offset = v2r32__sub_v2r32(p, self->window_client_center_p);
+
+    return v2r32__is_in_half_dims(p_offset, self->window_client_half_dims);
+}
+
 void camera__render(struct camera* self) {
     sim_region__routine(
         self->world,

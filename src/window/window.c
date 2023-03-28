@@ -180,14 +180,31 @@ void window__draw_pixel(struct window* self, struct v2u32 position, enum color c
 }
 
 void window__draw_rectangle(struct window* self, struct v2r32 top_left_p, struct v2r32 dims, enum color color) {
+    // todo: move this to renderer probably and do anti-aliasing there
     struct v2u32 start_p = v2u32(
-        (u32) round(clamp__r32(0.0f, top_left_p.x, (r32) self->frame_buffer.dims.x - 1.0f)),
-        (u32) round(clamp__r32(0.0f, top_left_p.y, (r32) self->frame_buffer.dims.y - 1.0f))
+        clamp__u32(
+            0,
+            (u32) round(clamp__r32(0.0f, top_left_p.x, (r32) self->frame_buffer.dims.x)),
+            self->frame_buffer.dims.x - 1
+        ),
+        clamp__u32(
+            0,
+            (u32) round(clamp__r32(0.0f, top_left_p.y, (r32) self->frame_buffer.dims.y)),
+            self->frame_buffer.dims.y - 1
+        )
     );
 
     struct v2u32 end_p = v2u32(
-        (u32) round(clamp__r32(0.0f, top_left_p.x + dims.x, (r32) self->frame_buffer.dims.x - 1.0f)),
-        (u32) round(clamp__r32(0.0f, top_left_p.y + dims.y, (r32) self->frame_buffer.dims.y - 1.0f))
+        clamp__u32(
+            0,
+            (u32) round(clamp__r32(0.0f, top_left_p.x + dims.x, (r32) self->frame_buffer.dims.x)),
+            self->frame_buffer.dims.x - 1
+        ),
+        clamp__u32(
+            0,
+            (u32) round(clamp__r32(0.0f, top_left_p.y + dims.y, (r32) self->frame_buffer.dims.y)),
+            self->frame_buffer.dims.y - 1
+        )
     );
 
     struct v2u32 clamped_dims = abs_diff__v2u32(start_p, end_p);

@@ -2,6 +2,8 @@
 
 #include "world_grid.h"
 
+#include "../math/clamp.h"
+
 void renderer__create(struct renderer* self) {
     push_buffer__create(&self->push_buffer);
 }
@@ -115,11 +117,25 @@ void renderer__render(
         viewport_half_dims
     );
 
-    struct v2r32 render_ratio = v2r32(
+    // note: perspective divide
+    struct v2r32 renderer_perspective_divide = v2r32(
         window_client_half_dims.x / viewport_half_dims.x,
         window_client_half_dims.y / viewport_half_dims.y
     );
-    struct v2r32 render_offset = window_client_center_p;
+
+    // note: viewport transport
+    struct v2r32 renderer_viewport_transport = window_client_center_p;
+
+    // note: clipping values
+    struct v2r32 render_clip_dims = v2r32__scale_r32(window_client_half_dims, 2.0f);
+    struct v2r32 render_clip_top_left_p = v2r32(
+        window_client_center_p.x - window_client_half_dims.x,
+        window_client_center_p.y - window_client_half_dims.y
+    );
+    struct v2r32 render_clip_bottom_right_p = v2r32(
+        window_client_center_p.x + window_client_half_dims.x,
+        window_client_center_p.y + window_client_half_dims.y
+    );
 
     for (u32 push_buffer_index = 0; push_buffer_index < self->push_buffer.rectangles_fill; ++push_buffer_index) {
         struct push_buffer_rectangle* rectangle = &self->push_buffer.rectangles[push_buffer_index];
@@ -127,12 +143,29 @@ void renderer__render(
             rectangle->center_p,
             v2r32__scale_r32(rectangle->half_dims, -1.0f)
         );
+
+        // note: perspective divide
         struct v2r32 rectangle_dims = v2r32__scale_r32(rectangle->half_dims, 2.0f);
+        rectangle_dims = v2r32__scale_v2r32(rectangle_dims, renderer_perspective_divide);
 
-        rectangle_top_left_p = v2r32__scale_v2r32(rectangle_top_left_p, render_ratio);
-        rectangle_top_left_p = v2r32__add_v2r32(rectangle_top_left_p, render_offset);
+        rectangle_top_left_p = v2r32__scale_v2r32(rectangle_top_left_p, renderer_perspective_divide);
 
-        rectangle_dims = v2r32__scale_v2r32(rectangle_dims, render_ratio);
+        // note: viewport transport
+        rectangle_top_left_p = v2r32__add_v2r32(rectangle_top_left_p, renderer_viewport_transport);
+
+        // note: clipping
+        struct v2r32 rectangle_bottom_right = v2r32__add_v2r32(rectangle_top_left_p, rectangle_dims);
+        rectangle_top_left_p = clamp__v2r32(
+            render_clip_top_left_p,
+            rectangle_top_left_p,
+            render_clip_bottom_right_p
+        );
+        rectangle_bottom_right = clamp__v2r32(
+            render_clip_top_left_p,
+            rectangle_bottom_right,
+            render_clip_bottom_right_p
+        );
+        rectangle_dims = v2r32__sub_v2r32(rectangle_bottom_right, rectangle_top_left_p);
 
         window__draw_rectangle(
             window,

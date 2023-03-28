@@ -30,6 +30,13 @@ static inline struct v2r32 v2r32__add_v2r32(struct v2r32 v, struct v2r32 w) {
     );
 }
 
+static inline struct v2r32 v2r32__sub_v2r32(struct v2r32 v, struct v2r32 w) {
+    return v2r32(
+        v.x - w.x,
+        v.y - w.y
+    );
+}
+
 static inline bool v2r32__is_in_half_dims(struct v2r32 v, struct v2r32 half_dims) {
     return v.x > -half_dims.x && v.x < half_dims.x && v.y > -half_dims.y && v.y < half_dims.y;
 }

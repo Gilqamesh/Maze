@@ -40,4 +40,6 @@ DLLEXPORT void camera__update_viewport_half_dims_absolute(struct camera* self, s
 // @brief relative to itself
 DLLEXPORT void camera__update_viewport_half_dims_relative(struct camera* self, struct v2r32 d_viewport_half_dims);
 
+DLLEXPORT bool camera__is_p_in_window_client_area(struct camera* self, struct v2r32 p);
+
 DLLEXPORT void camera__render(struct camera* self);

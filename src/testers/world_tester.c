@@ -42,7 +42,7 @@ void debug_push_sim_region_rec(struct camera* camera, struct world_position sim_
         sim_region_half_dims.y
     ));
     struct v2r32 rec_thickness = v2r32(2.0f, 2.0f);
-    
+
     // top_left -> top_right
     renderer__push_rectangle_top_left(
         &camera->renderer,
@@ -94,6 +94,14 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
     window__create(&window, app_handle, "World Tester Window", window_p, window_dims);
 
     struct camera camera_left;
+    struct v2r32 camera_left_window_client_half_dims = v2r32(
+        (r32) window.dims.x / 4.0f,
+        (r32) window.dims.y / 4.0f
+    );
+    struct v2r32 camera_left_window_client_center_p = v2r32(
+        (r32) window.dims.x / 4.0f,
+        (r32) window.dims.y / 4.0f
+    );
     camera__create(
         &camera_left,
         &window,
@@ -106,14 +114,33 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
             (r32) window.dims.x / 2.0f,
             (r32) window.dims.y / 2.0f
         ),
-        v2r32(
-            (r32) window.dims.x / 2.0f,
-            (r32) window.dims.y / 2.0f
+        camera_left_window_client_center_p,
+        camera_left_window_client_half_dims
+    );
+
+    struct camera camera_right;
+    struct v2r32 camera_right_window_client_half_dims = v2r32(
+        (r32) window.dims.x / 4.0f,
+        (r32) window.dims.y / 2.0f
+    );
+    struct v2r32 camera_right_window_client_center_p = v2r32(
+        3.0f * (r32) window.dims.x / 4.0f,
+        (r32) window.dims.y / 2.0f
+    );
+    camera__create(
+        &camera_right,
+        &window,
+        &world,
+        world_position(
+            v2i32(3, 3),
+            v2r32(0.0f, 0.0f)
         ),
         v2r32(
-            (r32) window.dims.x / 2.0f,
-            (r32) window.dims.y / 2.0f
-        )
+            2.0f * (r32) window.dims.x,
+            2.0f * (r32) window.dims.y
+        ),
+        camera_right_window_client_center_p,
+        camera_right_window_client_half_dims
     );
 
     struct entity* entities[128];
@@ -132,15 +159,26 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
 
         i32 wheel_delta = window__mouse_get_wheel_delta(&window);
         if (wheel_delta != 0) {
-            struct v2r32 renderer_start_half_dims_relative_change = v2r32(
-                (r32) wheel_delta * (camera_left.viewport_half_dims.x) / 2000.0f,
-                (r32) wheel_delta * (camera_left.viewport_half_dims.y) / 2000.0f
-            );
-            console__log(&console, "%f %f\n", renderer_start_half_dims_relative_change.x, renderer_start_half_dims_relative_change.y);
-            camera__update_viewport_half_dims_relative(&camera_left, renderer_start_half_dims_relative_change);
+            struct v2u32 mouse_p = window__mouse_get_position(&window);
+            if (camera__is_p_in_window_client_area(&camera_left, v2r32((r32) mouse_p.x, (r32) mouse_p.y))) {
+                struct v2r32 renderer_start_half_dims_relative_change = v2r32(
+                    (r32) wheel_delta * (camera_left.viewport_half_dims.x) / 2000.0f,
+                    (r32) wheel_delta * (camera_left.viewport_half_dims.y) / 2000.0f
+                );
+                // console__log(&console, "%f %f\n", renderer_start_half_dims_relative_change.x, renderer_start_half_dims_relative_change.y);
+                camera__update_viewport_half_dims_relative(&camera_left, renderer_start_half_dims_relative_change);
+            }
+            if (camera__is_p_in_window_client_area(&camera_right, v2r32((r32) mouse_p.x, (r32) mouse_p.y))) {
+                struct v2r32 renderer_start_half_dims_relative_change = v2r32(
+                    (r32) wheel_delta * (camera_right.viewport_half_dims.x) / 2000.0f,
+                    (r32) wheel_delta * (camera_right.viewport_half_dims.y) / 2000.0f
+                );
+                // console__log(&console, "%f %f\n", renderer_start_half_dims_relative_change.x, renderer_start_half_dims_relative_change.y);
+                camera__update_viewport_half_dims_relative(&camera_right, renderer_start_half_dims_relative_change);
+            }
         }
 
-        if (window__key_is_pressed(&window, KEY_RIGHT) &&
+        if (window__key_is_down(&window, KEY_RIGHT) &&
             entities_fill < sizeof(entities) / sizeof(entities[0])
         ) {
             struct v2r32 world_grid_dims = world_grid__dims();
@@ -161,7 +199,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
 
         if (window__key_is_down(&window, MOUSE_LBUTTON)) {
             struct v2u32 mouse_p = window__mouse_get_position(&window);
-            if (v2u32__is_less(mouse_p, window_dims)) {
+            if (camera__is_p_in_window_client_area(&camera_left, v2r32((r32) mouse_p.x, (r32) mouse_p.y))) {
                 struct v2i32 mouse_dp = window__mouse_get_delta(&window);
                 camera__update_viewport_p_relative(
                     &camera_left,
@@ -170,9 +208,22 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
                         (r32) -mouse_dp.y
                     )
                 );
-                console__log(&console, "%d %d, %f %f\n",
-                    camera_left.viewport_center_p.global_p.x, camera_left.viewport_center_p.global_p.y,
-                    camera_left.viewport_center_p.local_p.x, camera_left.viewport_center_p.local_p.y);
+                // console__log(&console, "%d %d, %f %f\n",
+                //     camera_left.viewport_center_p.global_p.x, camera_left.viewport_center_p.global_p.y,
+                //     camera_left.viewport_center_p.local_p.x, camera_left.viewport_center_p.local_p.y);
+            }
+            if (camera__is_p_in_window_client_area(&camera_right, v2r32((r32) mouse_p.x, (r32) mouse_p.y))) {
+                struct v2i32 mouse_dp = window__mouse_get_delta(&window);
+                camera__update_viewport_p_relative(
+                    &camera_right,
+                    v2r32(
+                        (r32) -mouse_dp.x,
+                        (r32) -mouse_dp.y
+                    )
+                );
+                // console__log(&console, "%d %d, %f %f\n",
+                //     camera_right.viewport_center_p.global_p.x, camera_right.viewport_center_p.global_p.y,
+                //     camera_right.viewport_center_p.local_p.x, camera_right.viewport_center_p.local_p.y);
             }
         }
 
@@ -185,13 +236,19 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
         );
 
         debug_push_sim_region_rec(&camera_left, sim_region_center_p, sim_region_half_dims);
+        debug_push_sim_region_rec(&camera_right, sim_region_center_p, sim_region_half_dims);
 
+        camera__render(&camera_right);
         camera__render(&camera_left);
 
         window__end_draw(&window);
         u64 end_time_stamp_counter = __rdtsc();
-        // console__log(&console, "Time stamp counter for frame: %u\n", end_time_stamp_counter - start_time_stamp_counter);
+        console__log(&console, "Time stamp counter for frame: %u\n", end_time_stamp_counter - start_time_stamp_counter);
     }
+
+    camera__destroy(&camera_right);
+    camera__destroy(&camera_left);
+
     window__destroy(&window);
 
     world__destroy(&world);
