@@ -4,12 +4,12 @@
     Entities hash table must be kept a power of 2 size at all times
 */
 
-#define ENTITIES_START_SIZE 16
+#define WORLD_GRID_ENTITIES_SIZE_START 16
 
 struct world_grid* world_grid__create(struct v2i32 global_p) {
     struct world_grid* result = (struct world_grid*) calloc(1, sizeof(*result));
 
-    result->entities_size = ENTITIES_START_SIZE;
+    result->entities_size = WORLD_GRID_ENTITIES_SIZE_START;
     result->entities_fill = 0;
     result->entities = (struct entity**) calloc(result->entities_size, sizeof(*result->entities));
     if (result->entities == NULL) {
@@ -83,7 +83,7 @@ void world_grid__remove_entity(struct world_grid* self, struct entity* entity) {
         }
     }
 
-    if (self->entities_size > ENTITIES_START_SIZE && self->entities_fill == (self->entities_size >> 1)) {
+    if (self->entities_size > WORLD_GRID_ENTITIES_SIZE_START && self->entities_fill == (self->entities_size >> 1)) {
         u32 new_entities_size = self->entities_size >> 1;
         // note: move the entities from the upper half to the lower half
         for (u32 entity_index = self->entities_fill; entity_index < self->entities_size; ++entity_index) {

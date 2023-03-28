@@ -10,8 +10,8 @@ void entity_processor_callback(struct entity** entities, u32 entities_size) {
         struct entity* entity = entities[entity_index];
         if (entity != NULL) {
             if (entity__flag_is_set(entity, ENTITY_FLAGS__IS_IN_SIM_REGION)) {
-                entity->sim_region_relative.relative_p.x += world__meters_to_pixels(0.001f);
-                entity->sim_region_relative.relative_p.y += world__meters_to_pixels(0.001f);
+                entity->sim_region_relative.relative_p.x += world__meters_to_pixels(0.01f);
+                entity->sim_region_relative.relative_p.y += world__meters_to_pixels(0.01f);
             }
         }
     }
@@ -110,8 +110,11 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
         sim_region__routine(
             &world,
             entity_processor_callback,
-            renderer.center_p,
-            renderer.half_dims
+            world_position(v2i32(0, 0), v2r32(0.0f, 0.0f)),
+            v2r32(
+                (r32) window.dims.x / 2.0f,
+                (r32) window.dims.y / 2.0f
+            )
         );
 
         renderer__push_entities(&renderer);

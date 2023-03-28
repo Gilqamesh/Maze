@@ -1,12 +1,25 @@
 #include "entity.h"
 
-struct entity* entity__create(struct world_position p, struct v2u32 bounding_box_dims) {
+struct entity* entity__create_absolute(struct world_position center_p, struct v2r32 bounding_box_half_dims) {
     struct entity* result = (struct entity*) calloc(1, sizeof(*result));
+    if (result == NULL) {
+        ExitProcess(APP_ERROR_ALLOC_FAIL);
+    }
 
-    result->p = p;
-    result->bounding_box_dims = bounding_box_dims;
+    result->center_p = center_p;
+    result->bounding_box_half_dims = bounding_box_half_dims;
 
     return result;
+}
+
+struct entity* entity__create_relative(struct v2r32 center_p, struct world_position relative_p, struct v2r32 bounding_box_half_dims) {
+    struct entity* result = (struct entity*) calloc(1, sizeof(*result));
+    if (result == NULL) {
+        ExitProcess(APP_ERROR_ALLOC_FAIL);
+    }
+
+    result->center_p = world_position__from_relative_p(center_p, relative_p);
+    result->bounding_box_half_dims = bounding_box_half_dims;
 }
 
 void entity__destroy(struct entity* self) {

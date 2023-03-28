@@ -2,8 +2,10 @@
 
 #include "world_defs.h"
 
-#include "world_position.h"
 #include "../math/v2u32.h"
+#include "../window/color.h"
+
+#include "world_position.h"
 
 /*
     Regarding entity position:
@@ -13,21 +15,25 @@
 */
 
 enum entity_flags {
-    ENTITY_FLAGS__IS_IN_SIM_REGION    = 1 << 0
+    ENTITY_FLAGS__IS_RENDEREABLE   = 1 << 0
 };
 
 struct entity {
     struct {
-        u32 flags;
-        struct v2r32 relative_p;
-    } sim_region_relative; // transient values set by set region
+        bool is_in_sim_region;
+        struct v2r32 relative_p; // relative to the sim_region's center_p
+    } processor_callback_transient_values; // transient values set by set by the sim_region for the entity_processor_callback
 
-    struct world_position p;
-
-    struct v2u32 bounding_box_dims;
+    u32 flags;
+    struct world_position center_p;
+    struct v2r32 bounding_box_half_dims;
+    enum color color;
 };
 
-DLLEXPORT struct entity* entity__create(struct world_position p, struct v2u32 bounding_box_dims);
+DLLEXPORT struct entity* entity__create_absolute(struct world_position center_p, struct v2r32 bounding_box_half_dims);
+// @param center_p the entity's position relative to 'relative_p'
+// @param relative_p the relative position which 'center_p' is relative to
+DLLEXPORT struct entity* entity__create_relative(struct v2r32 center_p, struct world_position relative_p, struct v2r32 bounding_box_half_dims);
 
 DLLEXPORT void entity__destroy(struct entity* self);
 
@@ -48,12 +54,12 @@ static inline struct v2u32 entity__average_dims(void) {
 
 static inline void entity__flag_set(struct entity* entity, enum entity_flags flag, bool is_true) {
     if (is_true) {
-        entity->sim_region_relative.flags |= flag;
+        entity->flags |= flag;
     } else {
-        entity->sim_region_relative.flags &= ~flag;
+        entity->flags &= ~flag;
     }
 }
 
 static inline bool entity__flag_is_set(struct entity* entity, enum entity_flags flag) {
-    return entity->sim_region_relative.flags & flag;
+    return entity->flags & flag;
 }

@@ -33,6 +33,7 @@
 */
 
 typedef void (*sim_region__entity_processor_callback)(
+    void* context,
     struct entity** entities,
     u32 entities_size
 );
@@ -41,6 +42,7 @@ typedef void (*sim_region__entity_processor_callback)(
 DLLEXPORT void sim_region__routine(
     struct world* world,
     sim_region__entity_processor_callback entity_processor_callback,
+    void* entity_processor_callback_context,
     struct world_position center_p,
     struct v2r32 half_dims
 );

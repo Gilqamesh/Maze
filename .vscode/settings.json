@@ -4,6 +4,9 @@
         "cmath": "c",
         "math_defs.h": "c",
         "world_position.h": "c",
-        "input_state.h": "c"
+        "input_state.h": "c",
+        "algorithm": "c",
+        "vector": "c",
+        "xstring": "c"
     }
 }
