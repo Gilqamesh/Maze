@@ -8,15 +8,15 @@ void camera__create(
     struct world* world,
     struct world_position viewport_center_p,
     struct v2r32 viewport_half_dims,
-    struct v2r32 window_client_center_p,
-    struct v2r32 window_client_half_dims
+    struct v2r32 window_client_top_left_p_normalized,
+    struct v2r32 window_client_bot_right_p_normalized
 ) {
     self->window = window;
     self->world = world;
     self->viewport_center_p = viewport_center_p;
     self->viewport_half_dims = viewport_half_dims;
-    self->window_client_center_p = window_client_center_p;
-    self->window_client_half_dims = window_client_half_dims;
+    self->window_client_top_left_p_normalized = window_client_top_left_p_normalized;
+    self->window_client_bot_right_p_normalized = window_client_bot_right_p_normalized;
 
     renderer__create(&self->renderer);
 }
@@ -50,7 +50,7 @@ static inline void camera_render_entity_processor_callback(
     for (u32 entity_index = 0; entity_index < entities_size; ++entity_index) {
         struct entity* entity = entities[entity_index];
         if (entity != NULL) {
-            if (entity->processor_callback_transient_values.is_in_sim_region) {
+            if (entity__flag_is_set(entity, ENTITY_FLAGS_IS_IN_SIM_REGION)) {
                 renderer__push_rectangle_centered(
                     renderer,
                     entity->processor_callback_transient_values.relative_p,
@@ -63,9 +63,19 @@ static inline void camera_render_entity_processor_callback(
 }
 
 bool camera__is_p_in_window_client_area(struct camera* self, struct v2r32 p) {
-    struct v2r32 p_offset = v2r32__sub_v2r32(p, self->window_client_center_p);
+    p = v2r32(
+        p.x / (r32) self->window->dims.x,
+        p.y / (r32) self->window->dims.y
+    );
+    if (p.x < self->window_client_top_left_p_normalized.x ||
+        p.x > self->window_client_bot_right_p_normalized.x ||
+        p.y < self->window_client_top_left_p_normalized.y || 
+        p.y > self->window_client_bot_right_p_normalized.y
+    ) {
+        return false;
+    }
 
-    return v2r32__is_in_half_dims(p_offset, self->window_client_half_dims);
+    return true;
 }
 
 void camera__render(struct camera* self) {
@@ -83,8 +93,8 @@ void camera__render(struct camera* self) {
         self->world,
         self->viewport_center_p,
         self->viewport_half_dims,
-        self->window_client_center_p,
-        self->window_client_half_dims
+        self->window_client_top_left_p_normalized,
+        self->window_client_bot_right_p_normalized
     );
 
     renderer__clear_push_buffer(&self->renderer);

@@ -29,6 +29,6 @@ DLLEXPORT void renderer__render(
     struct world* world,
     struct world_position viewport_p,
     struct v2r32 viewport_half_dims,
-    struct v2r32 window_client_center_p,
-    struct v2r32 window_client_half_dims
+    struct v2r32 window_client_top_left_p_normalized,
+    struct v2r32 window_client_bot_right_p_normalized
 );

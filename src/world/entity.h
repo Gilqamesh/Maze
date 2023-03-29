@@ -15,12 +15,12 @@
 */
 
 enum entity_flags {
-    ENTITY_FLAGS__TEMPORARY_UPDATE_FLAG = 1 << 0
+    ENTITY_FLAGS_SIMULATED_ALREADY = 1 << 0,
+    ENTITY_FLAGS_IS_IN_SIM_REGION  = 1 << 1
 };
 
 struct entity {
     struct {
-        bool is_in_sim_region;
         struct v2r32 relative_p; // relative to the sim_region's center_p
     } processor_callback_transient_values; // transient values set by set by the sim_region for the entity_processor_callback
 
@@ -66,10 +66,10 @@ static inline void entity__flag_set(struct entity* entity, enum entity_flags fla
     entity->flags |= flag;
 }
 
-static inline void entity__flag_clear(struct entity* entity, enum entity_flags flag, bool is_true) {
+static inline void entity__flag_clear(struct entity* entity, enum entity_flags flag) {
     entity->flags &= ~flag;
 }
 
 static inline bool entity__flag_is_set(struct entity* entity, enum entity_flags flag) {
-    return entity->flags & flag;
+    return (entity->flags & flag) != 0;
 }

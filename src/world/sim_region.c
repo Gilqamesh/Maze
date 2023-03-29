@@ -30,7 +30,9 @@ void sim_region__routine(
                 if (entity != NULL) {
                     struct v2r32 entity_p = world_position__to_relative_p(entity->center_p, center_p);
                     entity->processor_callback_transient_values.relative_p = entity_p;
-                    entity->processor_callback_transient_values.is_in_sim_region = v2r32__is_in_half_dims(entity_p, half_dims);
+                    if (v2r32__is_in_half_dims(entity_p, half_dims)) {
+                        entity__flag_set(entity, ENTITY_FLAGS_IS_IN_SIM_REGION);
+                    }
                 }
             }
 
@@ -42,7 +44,7 @@ void sim_region__routine(
                 struct entity* entity = entities[entity_index];
                 if (entity != NULL) {
                     entity->center_p = world_position__from_relative_p(entity->processor_callback_transient_values.relative_p, center_p);
-                    entity->processor_callback_transient_values.is_in_sim_region = false;
+                    entity__flag_clear(entity, ENTITY_FLAGS_IS_IN_SIM_REGION);
                     if (v2i32__is_equal(entity->center_p.global_p, grid_p) == false) {
                         world_grid__remove_entity(grid, entity);
                         struct world_grid* new_grid = world__get_grid(world, entity->center_p.global_p);

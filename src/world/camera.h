@@ -16,8 +16,8 @@ struct camera {
     struct world_position viewport_center_p;
     struct v2r32 viewport_half_dims;
 
-    struct v2r32 window_client_center_p;
-    struct v2r32 window_client_half_dims;
+    struct v2r32 window_client_top_left_p_normalized;
+    struct v2r32 window_client_bot_right_p_normalized;
 };
 
 DLLEXPORT void camera__create(
@@ -26,8 +26,8 @@ DLLEXPORT void camera__create(
     struct world* world,
     struct world_position viewport_center_p,
     struct v2r32 viewport_half_dims,
-    struct v2r32 window_client_center_p,
-    struct v2r32 window_client_half_dims
+    struct v2r32 window_client_top_left_p_normalized,
+    struct v2r32 window_client_bot_right_p_normalized
 );
 
 DLLEXPORT void camera__destroy(struct camera* self);
