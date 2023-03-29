@@ -167,6 +167,12 @@ void renderer__render(
         );
         rectangle_dims = v2r32__sub_v2r32(rectangle_bottom_right, rectangle_top_left_p);
 
+        /*
+         * per-sample processing
+         */
+
+        // blending 
+
         window__draw_rectangle(
             window,
             rectangle_top_left_p,
