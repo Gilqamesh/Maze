@@ -244,16 +244,16 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
         hero_entity->dp.x = 0.0f;
         hero_entity->dp.y = 0.0f;
         if (window__key_is_down(&window, KEY_RIGHT)) {
-            hero_entity->dp.x = world__meters_to_pixels(1.0f);
+            hero_entity->dp.x = world__meters_to_pixels(0.001f);
         }
         if (window__key_is_down(&window, KEY_LEFT)) {
-            hero_entity->dp.x = world__meters_to_pixels(-1.0f);
+            hero_entity->dp.x = world__meters_to_pixels(-0.001f);
         }
         if (window__key_is_down(&window, KEY_UP)) {
-            hero_entity->dp.y = world__meters_to_pixels(-1.0f);
+            hero_entity->dp.y = world__meters_to_pixels(-0.001f);
         }
         if (window__key_is_down(&window, KEY_DOWN)) {
-            hero_entity->dp.y = world__meters_to_pixels(1.0f);
+            hero_entity->dp.y = world__meters_to_pixels(0.001f);
         }
 
         i32 wheel_delta = window__mouse_get_wheel_delta(&window);
@@ -297,8 +297,8 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
                 COLOR_BLUE
             );
             entity->dp = v2r32(
-                world__meters_to_pixels(random__r32_closed(&random, -0.01f, 0.01f)),
-                world__meters_to_pixels(random__r32_closed(&random, -0.01f, 0.01f))
+                world__meters_to_pixels(random__r32_closed(&random, -1.0f, 1.0f)),
+                world__meters_to_pixels(random__r32_closed(&random, -1.0f, 1.0f))
             );
             struct world_grid* grid = world__get_grid(&world, hero_entity->center_p.global_p);
             world_grid__add_entity(grid, entity);
@@ -311,8 +311,8 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
                 camera__update_viewport_p_relative(
                     &camera_left,
                     v2r32(
-                        (r32) -mouse_dp.x,
-                        (r32) -mouse_dp.y
+                        3.0f * (r32) -mouse_dp.x,
+                        3.0f * (r32) -mouse_dp.y
                     )
                 );
             }
@@ -321,8 +321,8 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
                 camera__update_viewport_p_relative(
                     &camera_right,
                     v2r32(
-                        (r32) -mouse_dp.x,
-                        (r32) -mouse_dp.y
+                        3.0f * (r32) -mouse_dp.x,
+                        3.0f * (r32) -mouse_dp.y
                     )
                 );
             }

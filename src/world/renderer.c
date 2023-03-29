@@ -106,7 +106,17 @@ void renderer__render(
          * per-sample processing
          */
 
-        // blending 
+        // scissor test
+        if (rectangle_dims.x == 0.0f || rectangle_dims.y == 0.0f) {
+            continue ;
+        }
+
+        if (rectangle->color == COLOR_RED) {
+            i32 debug = 0;
+            ++debug;
+        }
+
+        // anti-aliasing
 
         window__draw_rectangle(
             window,
