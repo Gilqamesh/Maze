@@ -2,7 +2,7 @@
 
 struct entity* entity__create_absolute(
     struct world_position center_p,
-    struct v2r32 bounding_box_half_dims,
+    struct v3r32 bounding_box_half_dims,
     enum color color
 ) {
     struct entity* result = (struct entity*) calloc(1, sizeof(*result));
@@ -18,9 +18,9 @@ struct entity* entity__create_absolute(
 }
 
 struct entity* entity__create_relative(
-    struct v2r32 center_p,
+    struct v3r32 center_p,
     struct world_position relative_p,
-    struct v2r32 bounding_box_half_dims,
+    struct v3r32 bounding_box_half_dims,
     enum color color
 ) {
     struct entity* result = (struct entity*) calloc(1, sizeof(*result));

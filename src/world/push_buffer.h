@@ -2,18 +2,18 @@
 
 #include "world_defs.h"
 
-#include "../math/v2r32.h"
+#include "../math/v3r32.h"
 #include "../window/color.h"
 
 struct push_buffer_rectangle {
-    struct v2r32 center_p;
-    struct v2r32 half_dims;
+    struct v3r32 center_p;
+    struct v3r32 half_dims;
     enum color color;
 };
 
 DLLEXPORT struct push_buffer_rectangle push_buffer_rectangle__create(
-    struct v2r32 center_p,
-    struct v2r32 half_dims,
+    struct v3r32 center_p,
+    struct v3r32 half_dims,
     enum color color
 );
 
@@ -31,7 +31,11 @@ DLLEXPORT void push_buffer__clear(struct push_buffer* self);
 
 DLLEXPORT void push_buffer__push_rectangle(
     struct push_buffer* self,
-    struct v2r32 center_p,
-    struct v2r32 half_dims,
+    struct v3r32 center_p,
+    struct v3r32 half_dims,
     enum color color
+);
+
+DLLEXPORT void push_buffer__sort_rectangles(
+    struct push_buffer* self
 );

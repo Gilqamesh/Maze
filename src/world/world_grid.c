@@ -6,7 +6,7 @@
 
 #define WORLD_GRID_ENTITIES_SIZE_START 16
 
-struct world_grid* world_grid__create(struct v2i32 global_p) {
+struct world_grid* world_grid__create(struct v3i32 global_p) {
     struct world_grid* result = (struct world_grid*) calloc(1, sizeof(*result));
 
     result->entities_size = WORLD_GRID_ENTITIES_SIZE_START;

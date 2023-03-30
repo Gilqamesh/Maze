@@ -16,13 +16,13 @@ void world__destroy(struct world* self) {
     free(self->world_grids);
 }
 
-struct world_grid* world__get_grid(struct world* self, struct v2i32 global_p) {
+struct world_grid* world__get_grid(struct world* self, struct v3i32 global_p) {
     u32 hash_index = world_grid__hash(global_p, self->world_grids_size);
 
     for (u32 grid_index = hash_index; grid_index < self->world_grids_size; ++grid_index) {
         struct world_grid* world_grid = self->world_grids[grid_index];
         if (world_grid != NULL) {
-            if (v2i32__is_equal(world_grid->global_p, global_p)) {
+            if (v3i32__is_equal(world_grid->global_p, global_p)) {
                 return world_grid;
             }
         } else {
@@ -35,7 +35,7 @@ struct world_grid* world__get_grid(struct world* self, struct v2i32 global_p) {
     for (u32 grid_index = 0; grid_index < hash_index; ++grid_index) {
         struct world_grid* world_grid = self->world_grids[grid_index];
         if (world_grid != NULL) {
-            if (v2i32__is_equal(world_grid->global_p, global_p)) {
+            if (v3i32__is_equal(world_grid->global_p, global_p)) {
                 return world_grid;
             }
         } else {

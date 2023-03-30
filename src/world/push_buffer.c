@@ -3,8 +3,8 @@
 #define PUSH_BUFFER_RECTANGLES_SIZE_START 16
 
 struct push_buffer_rectangle push_buffer_rectangle__create(
-    struct v2r32 center_p,
-    struct v2r32 half_dims,
+    struct v3r32 center_p,
+    struct v3r32 half_dims,
     enum color color
 ) {
     struct push_buffer_rectangle result = { 0 };
@@ -42,8 +42,8 @@ void push_buffer__clear(struct push_buffer* self) {
 
 void push_buffer__push_rectangle(
     struct push_buffer* self,
-    struct v2r32 center_p,
-    struct v2r32 half_dims,
+    struct v3r32 center_p,
+    struct v3r32 half_dims,
     enum color color
 ) {
     if (self->rectangles_fill == self->rectangles_size) {
@@ -52,4 +52,20 @@ void push_buffer__push_rectangle(
     }
 
     self->rectangles[self->rectangles_fill++] = push_buffer_rectangle__create(center_p, half_dims, color);
+}
+
+void push_buffer__sort_rectangles(struct push_buffer* self) {
+    // todo: radix sort instead of bubble sort
+    bool is_sorted = false;
+    for (u32 outer_iter = 0; is_sorted == false && outer_iter < self->rectangles_fill; ++outer_iter) {
+        for (i32 rec_index = 0; rec_index < self->rectangles_fill - outer_iter - 1; ++rec_index) {
+            struct push_buffer_rectangle* rec_a = &self->rectangles[rec_index];
+            struct push_buffer_rectangle* rec_b = &self->rectangles[rec_index + 1];
+            if (rec_a->center_p.z > rec_b->center_p.z) {
+                struct push_buffer_rectangle tmp = *rec_a;
+                *rec_a = *rec_b;
+                *rec_b = tmp;
+            }
+        }
+    }
 }

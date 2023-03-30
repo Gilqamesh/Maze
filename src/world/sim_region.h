@@ -5,7 +5,8 @@
 #include "world.h"
 #include "entity.h"
 #include "renderer.h"
-#include "../math/v2r32.h"
+
+#include "../math/v3r32.h"
 
 /*
     -------------------------------------------------------------------
@@ -44,5 +45,5 @@ DLLEXPORT void sim_region__routine(
     sim_region__entity_processor_callback entity_processor_callback,
     void* entity_processor_callback_context,
     struct world_position center_p,
-    struct v2r32 half_dims
+    struct v3r32 half_dims
 );

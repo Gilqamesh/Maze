@@ -7,7 +7,7 @@ void camera__create(
     struct window* window,
     struct world* world,
     struct world_position viewport_center_p,
-    struct v2r32 viewport_half_dims,
+    struct v3r32 viewport_half_dims,
     struct v2r32 window_client_top_left_p_normalized,
     struct v2r32 window_client_bot_right_p_normalized
 ) {
@@ -29,16 +29,16 @@ void camera__update_viewport_p_absolute(struct camera* self, struct world_positi
     self->viewport_center_p = new_viewport_center_p;
 }
 
-void camera__update_viewport_p_relative(struct camera* self, struct v2r32 viewport_center_dp) {
+void camera__update_viewport_p_relative(struct camera* self, struct v3r32 viewport_center_dp) {
     self->viewport_center_p = world_position__from_relative_p(viewport_center_dp, self->viewport_center_p);
 }
 
-void camera__update_viewport_half_dims_absolute(struct camera* self, struct v2r32 new_viewport_half_dims) {
+void camera__update_viewport_half_dims_absolute(struct camera* self, struct v3r32 new_viewport_half_dims) {
     self->viewport_half_dims = new_viewport_half_dims;
 }
 
-void camera__update_viewport_half_dims_relative(struct camera* self, struct v2r32 d_viewport_half_dims) {
-    self->viewport_half_dims = v2r32__add_v2r32(self->viewport_half_dims, d_viewport_half_dims);
+void camera__update_viewport_half_dims_relative(struct camera* self, struct v3r32 d_viewport_half_dims) {
+    self->viewport_half_dims = v3r32__add_v3r32(self->viewport_half_dims, d_viewport_half_dims);
 }
 
 static inline void camera_render_entity_processor_callback(
@@ -86,6 +86,8 @@ void camera__render(struct camera* self) {
         self->viewport_center_p,
         self->viewport_half_dims
     );
+
+    push_buffer__sort_rectangles(&self->renderer.push_buffer);
 
     renderer__render(
         &self->renderer,

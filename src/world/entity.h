@@ -2,7 +2,7 @@
 
 #include "world_defs.h"
 
-#include "../math/v2u32.h"
+#include "../math/v3u32.h"
 #include "../window/color.h"
 
 #include "world_position.h"
@@ -21,27 +21,27 @@ enum entity_flags {
 
 struct entity {
     struct {
-        struct v2r32 relative_p; // relative to the sim_region's center_p
+        struct v3r32 relative_p; // relative to the sim_region's center_p
     } processor_callback_transient_values; // transient values set by set by the sim_region for the entity_processor_callback
 
-    struct v2r32 dp;
+    struct v3r32 dp;
     u32 flags;
     struct world_position center_p;
-    struct v2r32 bounding_box_half_dims;
+    struct v3r32 bounding_box_half_dims;
     enum color color;
 };
 
 DLLEXPORT struct entity* entity__create_absolute(
     struct world_position center_p,
-    struct v2r32 bounding_box_half_dims,
+    struct v3r32 bounding_box_half_dims,
     enum color color
 );
 // @param center_p the entity's position relative to 'relative_p'
 // @param relative_p the relative position which 'center_p' is relative to
 DLLEXPORT struct entity* entity__create_relative(
-    struct v2r32 center_p,
+    struct v3r32 center_p,
     struct world_position relative_p,
-    struct v2r32 bounding_box_half_dims,
+    struct v3r32 bounding_box_half_dims,
     enum color color
 );
 
@@ -55,8 +55,9 @@ static inline u32 entity__hash(struct entity* self, u32 hash_table_size) {
 #pragma warning(pop)
 }
 
-static inline struct v2u32 entity__average_dims(void) {
-    return v2u32(
+static inline struct v3u32 entity__average_dims(void) {
+    return v3u32(
+        world__meters_to_pixels(0.2f),
         world__meters_to_pixels(0.2f),
         world__meters_to_pixels(0.2f)
     );
