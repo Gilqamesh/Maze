@@ -42,34 +42,34 @@ void debug_push_sim_region_rec(struct camera* camera, struct world_position sim_
         sim_region_half_dims.x,
         sim_region_half_dims.y
     ));
-    struct v2r32 rec_thickness = v2r32(2.0f, 2.0f);
+    struct v2r32 rec_thickness = v2r32(3.5f, 3.5f);
 
     // top_left -> top_right
     renderer__push_rectangle_top_left(
         &camera->renderer,
         top_left_p,
-        v2r32(top_right_p.x - top_left_p.x, rec_thickness.y),
+        v2r32(top_right_p.x - top_left_p.x + rec_thickness.x, rec_thickness.y),
         COLOR_RED
     );
     // top_right -> bottom_right
     renderer__push_rectangle_top_left(
         &camera->renderer,
         top_right_p,
-        v2r32(rec_thickness.x, bottom_right_p.y - top_right_p.y),
+        v2r32(rec_thickness.x, bottom_right_p.y - top_right_p.y + rec_thickness.y),
         COLOR_RED
     );
     // top_left -> bottom_left
     renderer__push_rectangle_top_left(
         &camera->renderer,
         top_left_p,
-        v2r32(rec_thickness.x, bottom_left_p.y - top_left_p.y),
+        v2r32(rec_thickness.x, bottom_left_p.y - top_left_p.y + rec_thickness.y),
         COLOR_RED
     );
     // bottom_left -> bottom_right
     renderer__push_rectangle_top_left(
         &camera->renderer,
         bottom_left_p,
-        v2r32(bottom_right_p.x - bottom_left_p.x, rec_thickness.y),
+        v2r32(bottom_right_p.x - bottom_left_p.x + rec_thickness.x, rec_thickness.y),
         COLOR_RED
     );
 }
@@ -258,7 +258,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
 
         i32 wheel_delta = window__mouse_get_wheel_delta(&window);
         if (wheel_delta != 0) {
-            struct v2u32 mouse_p = window__mouse_get_position(&window);
+            struct v2i32 mouse_p = window__mouse_get_position(&window);
             if (camera__is_p_in_window_client_area(&camera_left, v2r32((r32) mouse_p.x, (r32) mouse_p.y))) {
                 struct v2r32 renderer_start_half_dims_relative_change = v2r32(
                     (r32) wheel_delta * (camera_left.viewport_half_dims.x) / 2000.0f,
@@ -305,7 +305,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
         }
 
         if (window__key_is_down(&window, MOUSE_LBUTTON)) {
-            struct v2u32 mouse_p = window__mouse_get_position(&window);
+            struct v2i32 mouse_p = window__mouse_get_position(&window);
             if (camera__is_p_in_window_client_area(&camera_left, v2r32((r32) mouse_p.x, (r32) mouse_p.y))) {
                 struct v2i32 mouse_dp = window__mouse_get_delta(&window);
                 camera__update_viewport_p_relative(
@@ -349,7 +349,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
 
         window__end_draw(&window);
         u64 end_time_stamp_counter = __rdtsc();
-        console__log(&console, "Time stamp counter for frame: %u\n", end_time_stamp_counter - start_time_stamp_counter);
+        // console__log(&console, "Time stamp counter for frame: %u\n", end_time_stamp_counter - start_time_stamp_counter);
     }
 
     camera__destroy(&camera_right);

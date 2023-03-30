@@ -118,7 +118,7 @@ void renderer__render(
 
         // anti-aliasing
 
-        window__draw_rectangle(
+        window__draw_rectangle_aa(
             window,
             rectangle_top_left_p,
             rectangle_dims,

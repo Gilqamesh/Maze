@@ -9,15 +9,15 @@
 
 // ARGB
 enum colors {
-    COLOR_RED    = 0x00ff0000,
-    COLOR_GREEN  = 0x0000ff00,
-    COLOR_BLUE   = 0x000000ff,
-    COLOR_YELLOW = 0x00ffff00,
-    COLOR_PURPLE = 0x00ff00ff,
-    COLOR_CYAN   = 0x0000ffff,
-    COLOR_WHITE  = 0x00ffffff,
-    COLOR_GRAY   = 0x00c8c8c8,
-    COLOR_BLACK  = 0x00000000
+    COLOR_RED    = 0xffff0000,
+    COLOR_GREEN  = 0xff00ff00,
+    COLOR_BLUE   = 0xff0000ff,
+    COLOR_YELLOW = 0xffffff00,
+    COLOR_PURPLE = 0xffff00ff,
+    COLOR_CYAN   = 0xff00ffff,
+    COLOR_WHITE  = 0xffffffff,
+    COLOR_GRAY   = 0xffc8c8c8,
+    COLOR_BLACK  = 0xff000000
 };
 
 static inline u32 color(u32 red, u32 green, u32 blue, u32 alpha) {

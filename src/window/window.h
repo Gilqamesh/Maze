@@ -32,7 +32,7 @@ DLLEXPORT void window__poll_inputs(struct window* self);
 
 DLLEXPORT void window__end_draw(struct window* self);
 
-DLLEXPORT struct v2u32 window__mouse_get_position(struct window* self);
+DLLEXPORT struct v2i32 window__mouse_get_position(struct window* self);
 DLLEXPORT struct v2i32 window__mouse_get_delta(struct window* self);
 DLLEXPORT i32 window__mouse_get_wheel_delta(struct window* self);
 DLLEXPORT u32 window__key_is_pressed(struct window* self, enum key key);
@@ -42,6 +42,7 @@ DLLEXPORT bool window__key_is_down(struct window* self, enum key key);
 DLLEXPORT void window__clear_screen(struct window* self, enum color color);
 DLLEXPORT void window__draw_pixel(struct window* self, struct v2u32 position, enum color color);
 DLLEXPORT void window__draw_rectangle(struct window* self, struct v2r32 top_left_p, struct v2r32 dims, enum color color);
+DLLEXPORT void window__draw_rectangle_aa(struct window* self, struct v2r32 top_left_p, struct v2r32 dims, enum color color);
 DLLEXPORT void window__draw_bitmap(struct window* self, struct v2u32 top_left_p, struct bitmap* bitmap);
 
 #endif

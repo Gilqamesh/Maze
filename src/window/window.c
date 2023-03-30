@@ -5,6 +5,7 @@
 #include "../math/abs_diff.h"
 #include "../readers/bitmap.h"
 #include "../math/lerp.h"
+#include "../math/r32.h"
 
 bool window__init_module(struct window* self, struct console* console) {
     self->console = console;
@@ -133,15 +134,12 @@ void window__end_draw(struct window* self) {
     InvalidateRect(self->window_handle, NULL, FALSE);
 }
 
-struct v2u32 window__mouse_get_position(struct window* self) {
+struct v2i32 window__mouse_get_position(struct window* self) {
     return self->input_state.mouse.mouse_p;
 }
 
 struct v2i32 window__mouse_get_delta(struct window* self) {
-    return v2i32(
-        (i32) self->input_state.mouse.mouse_p.x - (i32) self->input_state.mouse.mouse_p_prev.x,
-        (i32) self->input_state.mouse.mouse_p.y - (i32) self->input_state.mouse.mouse_p_prev.y
-    );
+    return v2i32__sub_v2i32(self->input_state.mouse.mouse_p, self->input_state.mouse.mouse_p_prev);
 }
 
 i32 window__mouse_get_wheel_delta(struct window* self) {
@@ -181,14 +179,13 @@ void window__draw_pixel(struct window* self, struct v2u32 position, enum color c
     *((u32*) (self->frame_buffer.buffer) + position.y * self->frame_buffer.dims.x + position.x) = color;
 }
 
-void window__draw_rectangle(struct window* self, struct v2r32 top_left_p, struct v2r32 dims, enum color color) {
-    // todo: move this to renderer probably and do anti-aliasing there
+void window__draw_rectangle_aa(struct window* self, struct v2r32 top_left_p, struct v2r32 dims, enum color color) {
     top_left_p = clamp__v2r32(
         v2r32(0.0f, 0.0f),
         top_left_p,
         v2r32(
-            (r32) self->frame_buffer.dims.x,
-            (r32) self->frame_buffer.dims.y
+            (r32) self->frame_buffer.dims.x - 1.0f,
+            (r32) self->frame_buffer.dims.y - 1.0f
         )
     );
     struct v2u32 top_left_p_v2u32 = v2u32(
@@ -209,8 +206,8 @@ void window__draw_rectangle(struct window* self, struct v2r32 top_left_p, struct
         v2r32(0.0f, 0.0f),
         bottom_right_p,
         v2r32(
-            (r32) self->frame_buffer.dims.x,
-            (r32) self->frame_buffer.dims.y
+            (r32) self->frame_buffer.dims.x - 1.0f,
+            (r32) self->frame_buffer.dims.y - 1.0f
         )
     );
     struct v2u32 bottom_right_p_v2u32 = v2u32(
@@ -235,71 +232,136 @@ void window__draw_rectangle(struct window* self, struct v2r32 top_left_p, struct
     u32* bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
 
     /*
-     * Anti-alias
+     * Anti-aliasing
      */
     // note: top
     for (u32 col_offset = 1; col_offset < clamped_dims.x - 1; ++col_offset) {
-        r32 dest_overlap = 1.0f - (top_left_p.y - (r32)(u32)top_left_p.y);
-        *(bit_buffer_p + col_offset) = lerp__rgba(*(bit_buffer_p + col_offset), dest_overlap, color);
+        r32 dest_overlap = 1.0f - r32__fractional_part(top_left_p.y);
+        *(bit_buffer_p + col_offset) = lerp__color(*(bit_buffer_p + col_offset), dest_overlap, color);
     }
     // note: bottom
     bit_buffer_p += bit_buffer_stride * (clamped_dims.y - 1);
     for (u32 col_offset = 1; col_offset < clamped_dims.x - 1; ++col_offset) {
-        r32 dest_overlap = bottom_right_p.y - (r32)(u32)bottom_right_p.y;
-        *(bit_buffer_p + col_offset) = lerp__rgba(*(bit_buffer_p + col_offset), dest_overlap, color);
+        r32 dest_overlap = r32__fractional_part(bottom_right_p.y);
+        *(bit_buffer_p + col_offset) = lerp__color(*(bit_buffer_p + col_offset), dest_overlap, color);
+    }
+    // note: left
+    bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
+    bit_buffer_p += bit_buffer_stride;
+    for (u32 row_offset = 1; row_offset < clamped_dims.y - 1; ++row_offset) {
+        r32 dest_overlap = 1.0f - r32__fractional_part(top_left_p.x);
+        *(bit_buffer_p) = lerp__color(*(bit_buffer_p), dest_overlap, color);
+        bit_buffer_p += bit_buffer_stride;
+    }
+    // note: right
+    bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
+    bit_buffer_p += clamped_dims.x - 1;
+    for (u32 row_offset = 1; row_offset < clamped_dims.y - 1; ++row_offset) {
+        r32 dest_overlap = r32__fractional_part(bottom_right_p.x);
+        *(bit_buffer_p) = lerp__color(*(bit_buffer_p), dest_overlap, color);
+        bit_buffer_p += bit_buffer_stride;
+    }
+    // note: top-left
+    bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
+    {
+        struct v2r32 dest_overlap_v2r32 = v2r32(
+            1.0f - r32__fractional_part(top_left_p.x),
+            1.0f - r32__fractional_part(top_left_p.y)
+        );
+        r32 dest_overlap = v2r32__dot_v2r32(dest_overlap_v2r32, dest_overlap_v2r32);
+        *(bit_buffer_p) = lerp__color(*(bit_buffer_p), dest_overlap, color);
+    }
+    // note: top-right
+    bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
+    bit_buffer_p += clamped_dims.x - 1;
+    {
+        struct v2r32 dest_overlap_v2r32 = v2r32(
+            r32__fractional_part(bottom_right_p.x),
+            1.0f - r32__fractional_part(top_left_p.y)
+        );
+        r32 dest_overlap = v2r32__dot_v2r32(dest_overlap_v2r32, dest_overlap_v2r32);
+        *(bit_buffer_p) = lerp__color(*(bit_buffer_p), dest_overlap, color);
+    }
+    // note: bottom_left
+    bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
+    bit_buffer_p += bit_buffer_stride * (clamped_dims.y - 1);
+    {
+        struct v2r32 dest_overlap_v2r32 = v2r32(
+            1.0f - r32__fractional_part(top_left_p.x),
+            r32__fractional_part(bottom_right_p.y)
+        );
+        r32 dest_overlap = v2r32__dot_v2r32(dest_overlap_v2r32, dest_overlap_v2r32);
+        *(bit_buffer_p) = lerp__color(*(bit_buffer_p), dest_overlap, color);
+    }
+    // note: bottom_right
+    bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
+    bit_buffer_p += bit_buffer_stride * (clamped_dims.y - 1);
+    bit_buffer_p += clamped_dims.x - 1;
+    {
+        struct v2r32 dest_overlap_v2r32 = v2r32(
+            r32__fractional_part(bottom_right_p.x),
+            r32__fractional_part(bottom_right_p.y)
+        );
+        r32 dest_overlap = v2r32__dot_v2r32(dest_overlap_v2r32, dest_overlap_v2r32);
+        *(bit_buffer_p) = lerp__color(*(bit_buffer_p), dest_overlap, color);
     }
 
+    // note: mid fill
     bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
+    bit_buffer_p += bit_buffer_stride;
     for (u32 row_offset = 1; row_offset < clamped_dims.y - 1; ++row_offset) {
+        for (u32 col_offset = 1; col_offset < clamped_dims.x - 1; ++col_offset) {
+            *(bit_buffer_p + col_offset) = *(u32 *)&color;
+        }
+        bit_buffer_p += bit_buffer_stride;
+    }
+}
+
+void window__draw_rectangle(struct window* self, struct v2r32 top_left_p, struct v2r32 dims, enum color color) {
+    // todo: move this to renderer probably and do anti-aliasing there
+    struct v2u32 top_left_p_v2u32 = v2u32(
+        clamp__u32(
+            0,
+            (u32) round(clamp__r32(0.0f, top_left_p.x, (r32) self->frame_buffer.dims.x)),
+            self->frame_buffer.dims.x - 1
+        ),
+        clamp__u32(
+            0,
+            (u32) round(clamp__r32(0.0f, top_left_p.y, (r32) self->frame_buffer.dims.y)),
+            self->frame_buffer.dims.y - 1
+        )
+    );
+
+    struct v2u32 bottom_right_p_v2u32 = v2u32(
+        clamp__u32(
+            0,
+            (u32) round(clamp__r32(0.0f, top_left_p.x + dims.x, (r32) self->frame_buffer.dims.x)),
+            self->frame_buffer.dims.x - 1
+        ),
+        clamp__u32(
+            0,
+            (u32) round(clamp__r32(0.0f, top_left_p.y + dims.y, (r32) self->frame_buffer.dims.y)),
+            self->frame_buffer.dims.y - 1
+        )
+    );
+
+    // struct v2u32 clamped_dims = abs_diff__v2u32(top_left_p_v2u32, bottom_right_p_v2u32);
+    struct v2u32 clamped_dims = v2u32(
+        bottom_right_p_v2u32.x - top_left_p_v2u32.x,
+        bottom_right_p_v2u32.y - top_left_p_v2u32.y
+    );
+    clamped_dims.x += 1;
+    clamped_dims.y += 1;
+
+    u32  bit_buffer_stride = self->frame_buffer.dims.x;
+    u32* bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
+
+    for (u32 row_offset = 0; row_offset < clamped_dims.y; ++row_offset) {
         for (u32 col_offset = 0; col_offset < clamped_dims.x; ++col_offset) {
             *(bit_buffer_p + col_offset) = *(u32 *)&color;
         }
         bit_buffer_p += bit_buffer_stride;
     }
-
-    // struct v2u32 top_left_p_v2u32 = v2u32(
-    //     clamp__u32(
-    //         0,
-    //         (u32) round(clamp__r32(0.0f, top_left_p.x, (r32) self->frame_buffer.dims.x)),
-    //         self->frame_buffer.dims.x - 1
-    //     ),
-    //     clamp__u32(
-    //         0,
-    //         (u32) round(clamp__r32(0.0f, top_left_p.y, (r32) self->frame_buffer.dims.y)),
-    //         self->frame_buffer.dims.y - 1
-    //     )
-    // );
-
-    // struct v2u32 bottom_right_p_v2u32 = v2u32(
-    //     clamp__u32(
-    //         0,
-    //         (u32) round(clamp__r32(0.0f, top_left_p.x + dims.x, (r32) self->frame_buffer.dims.x)),
-    //         self->frame_buffer.dims.x - 1
-    //     ),
-    //     clamp__u32(
-    //         0,
-    //         (u32) round(clamp__r32(0.0f, top_left_p.y + dims.y, (r32) self->frame_buffer.dims.y)),
-    //         self->frame_buffer.dims.y - 1
-    //     )
-    // );
-
-    // // struct v2u32 clamped_dims = abs_diff__v2u32(top_left_p_v2u32, bottom_right_p_v2u32);
-    // struct v2u32 clamped_dims = v2u32(
-    //     bottom_right_p_v2u32.x - top_left_p_v2u32.x,
-    //     bottom_right_p_v2u32.y - top_left_p_v2u32.y
-    // );
-    // clamped_dims.x += 1;
-    // clamped_dims.y += 1;
-
-    // u32  bit_buffer_stride = self->frame_buffer.dims.x;
-    // u32* bit_buffer_p = ((u32*) self->frame_buffer.buffer) + top_left_p_v2u32.y * bit_buffer_stride + top_left_p_v2u32.x;
-
-    // for (u32 row_offset = 0; row_offset < clamped_dims.y; ++row_offset) {
-    //     for (u32 col_offset = 0; col_offset < clamped_dims.x; ++col_offset) {
-    //         *(bit_buffer_p + col_offset) = *(u32 *)&color;
-    //     }
-    //     bit_buffer_p += bit_buffer_stride;
-    // }
 }
 
 void window__draw_bitmap(struct window* self, struct v2u32 top_left_p, struct bitmap* bitmap) {
