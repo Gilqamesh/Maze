@@ -17,3 +17,6 @@ DLLEXPORT void console__log(struct console* self, char* msg, ...);
 
 // @brief use to exit the application process in case something goes wrong..
 DLLEXPORT void console__fatal(struct console* self, char *error_msg, ...);
+
+// todo: implement error levels, remove fatal
+DLLEXPORT void console__error(struct console* self, char *error_msg, ...);

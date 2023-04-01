@@ -45,7 +45,9 @@ bool bmp_loader__create(struct bmp_loader* self, struct file_reader* reader, str
     u32 read_bytes_so_far = 0;
     while (file_reader__eof_reached(reader) == false) {
         char read_byte;
-        file_reader__read_byte(reader, &read_byte);
+        if (file_reader__read(reader, &read_byte, sizeof(read_byte)) < sizeof(read_byte)) {
+            return false;
+        }
 
         if (_bmp_loader_ensure_size(self, ++self->fill) == false) {
             return false;

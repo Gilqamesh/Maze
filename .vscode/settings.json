@@ -7,6 +7,9 @@
         "input_state.h": "c",
         "algorithm": "c",
         "vector": "c",
-        "xstring": "c"
+        "xstring": "c",
+        "xaudio2.h": "c",
+        "riff_loader.h": "c",
+        "wav_loader.h": "c"
     }
 }

@@ -25,6 +25,7 @@ set LFLAGS=%NoIncrementalLinking%^
             window.lib^
             button.lib^
             camera.lib^
+            audio.lib^
             file_reader.lib
 
 FOR %%F IN (../src/testers/*.c) DO cl %CFLAGS% ../src/testers/%%F /link %LFLAGS%

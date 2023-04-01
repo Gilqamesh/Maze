@@ -36,7 +36,7 @@ void ui_group__push_box(struct ui_group* self, struct box* box) {
 }
 
 void ui_group__update_and_render(struct ui_group* self) {
-    struct v2u32 mp               = window__mouse_get_position(self->window);
+    struct v2i32 mp               = window__mouse_get_position(self->window);
     struct v2r32 ui_group_scale   = v2r32((r32) self->window->dims.x / (r32) self->original_window_dims.x, (r32) self->window->dims.y / (r32) self->original_window_dims.y);
     struct v2r32 cur_p            = v2r32(self->p.x * ui_group_scale.x, self->p.y * ui_group_scale.y);
     struct v2r32 cur_dims         = v2r32(self->dims.x * ui_group_scale.x, self->dims.y * ui_group_scale.y);

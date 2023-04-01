@@ -3,7 +3,7 @@
 
 #include "../math/clamp.h"
 #include "../math/abs_diff.h"
-#include "../readers/bitmap.h"
+#include "../reader/bitmap.h"
 #include "../math/lerp.h"
 #include "../math/r32.h"
 
