@@ -57,7 +57,7 @@ static void assets__load(struct bitmap* bitmap_generate, struct console* console
     struct bmp_loader bmp_loader;
 
     const char* filename = "assets/art.bmp";
-    file_reader__create(&reader, console, filename);
+    file_reader__create(&reader, filename);
 
     if (bmp_loader__create(&bmp_loader, &reader, bitmap_generate) == false) {
         console__fatal(console, "in 'assets__load': couldn't load file: %s\n", filename);
