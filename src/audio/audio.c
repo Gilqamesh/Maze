@@ -2,21 +2,11 @@
 
 #include "../math/clamp.h"
 
-bool audio__init_module(void) {
+bool audio__init_module(struct audio_module* self) {
     if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED))) {
         return false;
     }
 
-    return true;
-}
-
-void audio__deinit_module(void) {
-    CoUninitialize();
-}
-
-#define SOURCE_VOICE_MAX_FREQUENCY_RATIO XAUDIO2_DEFAULT_FREQ_RATIO
-
-bool audio__create(struct audio* self, const char* audio_file_path, bool should_loop_forever) {
     if (FAILED(XAudio2Create(&self->audio_interface, 0, XAUDIO2_DEFAULT_PROCESSOR))) {
         return false;
     }
@@ -41,7 +31,24 @@ bool audio__create(struct audio* self, const char* audio_file_path, bool should_
         return false;
     }
 
-    WAVEFORMATEX wfx = {0};
+    return true;
+}
+
+void audio__deinit_module(struct audio_module* self) {
+    CoUninitialize();
+}
+
+#define SOURCE_VOICE_MAX_FREQUENCY_RATIO XAUDIO2_DEFAULT_FREQ_RATIO
+
+bool audio__create(
+    struct audio* self,
+    struct audio_module* audio_module,
+    const char* audio_file_path,
+    bool should_loop_forever
+) {
+    self->module = audio_module;
+
+    WAVEFORMATEX source_wave_format = {0};
     memset(&self->source_buffer_config, 0, sizeof(self->source_buffer_config));
 
     if (wav_loader__create(&self->wav_loader, audio_file_path) == false) {
@@ -50,13 +57,13 @@ bool audio__create(struct audio* self, const char* audio_file_path, bool should_
 
     struct wav_format* format = self->wav_loader.format.format;
 
-    wfx.wFormatTag      = format->format_type;
-    wfx.nChannels       = format->number_of_channels;
-    wfx.nSamplesPerSec  = format->sample_rate;
-    wfx.nAvgBytesPerSec = format->byte_rate;
-    wfx.nBlockAlign     = format->block_align;
-    wfx.wBitsPerSample  = format->bits_per_sample;
-    wfx.cbSize          = 0;
+    source_wave_format.wFormatTag      = format->format_type;
+    source_wave_format.nChannels       = format->number_of_channels;
+    source_wave_format.nSamplesPerSec  = format->sample_rate;
+    source_wave_format.nAvgBytesPerSec = format->byte_rate;
+    source_wave_format.nBlockAlign     = format->block_align;
+    source_wave_format.wBitsPerSample  = format->bits_per_sample;
+    source_wave_format.cbSize          = 0;
 
     self->source_buffer_config.AudioBytes = self->wav_loader.samples.data_size;
     self->source_buffer_config.pAudioData = self->wav_loader.samples.data;
@@ -68,13 +75,13 @@ bool audio__create(struct audio* self, const char* audio_file_path, bool should_
 
     // note: submix voice
     const u32 submix_input_channels = 1;
-    const u32 submix_input_sample_rate = format->sample_rate;
+    const u32 submix_input_sample_rate = source_wave_format.nSamplesPerSec;
     const u32 submix_flags = 0;
     const u32 submix_processing_stage = 0;
     const XAUDIO2_VOICE_SENDS* submix_send_list = NULL;
     const XAUDIO2_EFFECT_CHAIN* submix_effect_chain = NULL;
-    if (FAILED(self->audio_interface->lpVtbl->CreateSubmixVoice(
-        self->audio_interface,
+    if (FAILED(audio_module->audio_interface->lpVtbl->CreateSubmixVoice(
+        audio_module->audio_interface,
         &self->main_submix_voice,
         submix_input_channels,
         submix_input_sample_rate,
@@ -97,16 +104,16 @@ bool audio__create(struct audio* self, const char* audio_file_path, bool should_
     const u32 source_voice_flags = 0;
     const r32 max_frequency_ratio = SOURCE_VOICE_MAX_FREQUENCY_RATIO;
     IXAudio2VoiceCallback* source_voice_callback = NULL;
-    const XAUDIO2_VOICE_SENDS* source_voice_send_list = &sfx_send_list;
+    const XAUDIO2_VOICE_SENDS source_voice_send_list = sfx_send_list;
     const XAUDIO2_EFFECT_CHAIN* source_voice_effect_chain = NULL;
-    if (FAILED(self->audio_interface->lpVtbl->CreateSourceVoice(
-        self->audio_interface,
+    if (FAILED(audio_module->audio_interface->lpVtbl->CreateSourceVoice(
+        audio_module->audio_interface,
         &self->source_voice,
-        &wfx,
+        &source_wave_format,
         source_voice_flags,
         max_frequency_ratio,
         source_voice_callback,
-        source_voice_send_list,
+        &source_voice_send_list,
         source_voice_effect_chain
     ))) {
         wav_loader__destroy(&self->wav_loader);

@@ -6,19 +6,28 @@
 
 #include <xaudio2.h>
 
-struct audio {
+struct audio_module {
     IXAudio2*                audio_interface;
+    IXAudio2MasteringVoice*  mastering_voice;
+};
+
+struct audio {
+    struct audio_module*     module;
     IXAudio2SourceVoice*     source_voice;
     IXAudio2SubmixVoice*     main_submix_voice;
-    IXAudio2MasteringVoice*  mastering_voice;
     XAUDIO2_BUFFER           source_buffer_config;
     struct wav_loader        wav_loader;
 };
 
-DLLEXPORT bool audio__init_module(void);
-DLLEXPORT void audio__deinit_module(void);
+DLLEXPORT bool audio__init_module(struct audio_module* self);
+DLLEXPORT void audio__deinit_module(struct audio_module* self);
 
-DLLEXPORT bool audio__create(struct audio* self, const char* audio_file_path, bool should_loop_forever);
+DLLEXPORT bool audio__create(
+    struct audio* self,
+    struct audio_module* audio_module,
+    const char* audio_file_path,
+    bool should_loop_forever
+);
 DLLEXPORT void audio__destroy(struct audio* self);
 
 DLLEXPORT bool audio__start(struct audio* self);

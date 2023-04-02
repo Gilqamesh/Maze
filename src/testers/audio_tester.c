@@ -9,17 +9,24 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
     window__init_module(&window, &console);
     window__create(&window, app_handle, "Audio Tester Window", v2u32(100, 100), v2u32(800, 600));
 
-    if (audio__init_module() == false) {
+    struct audio_module audio_module;
+    if (audio__init_module(&audio_module) == false) {
         ExitProcess(1);
     }
 
     const char* wav_file_path = "../assets/634.wav";
+    const char* wav_file_path2 = "../assets/555.wav";
     struct audio audio;
-    if (audio__create(&audio, wav_file_path, true) == false) {
+    struct audio audio2;
+    if (audio__create(&audio, &audio_module, wav_file_path, true) == false ||
+        audio__create(&audio2, &audio_module, wav_file_path2, true) == false
+    ) {
         ExitProcess(2);
     }
 
-    if (audio__start(&audio) == false) {
+    if (audio__start(&audio) == false ||
+        audio__start(&audio2) == false
+    ) {
         ExitProcess(3);
     }
 
@@ -49,7 +56,7 @@ int WinMain(HINSTANCE app_handle, HINSTANCE prev_instance, LPSTR cmd_line, int s
 
     audio__destroy(&audio);
 
-    audio__deinit_module();
+    audio__deinit_module(&audio_module);
 
     console__deinit_module(&console);
 }
