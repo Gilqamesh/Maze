@@ -22,5 +22,8 @@ set LFLAGS=^
 
 cl %CFLAGS%^
     ../src/%MODULE_NAME%/audio.c^
+<<<<<<< HEAD
     ../src/%MODULE_NAME%/audio_callback.c^
+=======
+>>>>>>> b4525ede878d8dd81f1598897960cc095e29bf62
     /link %LFLAGS%

@@ -1,7 +1,14 @@
 #include "button.h"
 #include "../math/clamp.h"
 
-void button__create(struct button* self, struct v2r32 p, struct v2r32 dims, enum color color_passive, enum color color_hovered, enum color color_active) {
+void button__create(
+    struct button* self,
+    struct v2r32 p,
+    struct v2r32 dims,
+    enum color color_passive,
+    enum color color_hovered,
+    enum color color_active
+) {
     self->next                 = NULL;
     self->p                    = p;
     self->dims                 = dims;
@@ -31,7 +38,15 @@ bool button__is_pressed(struct button* self) {
     return self->is_pressed;
 }
 
-void button__update_and_render(struct button* self, struct window* window, struct v2u32 mp, struct v2r32 ui_group_offset, struct v2r32 ui_group_dims, struct v2r32 ui_group_scale, bool is_mouse_lbutton_pressed) {
+void button__update_and_render(
+    struct button* self,
+    struct window* window,
+    struct v2i32 mp,
+    struct v2r32 ui_group_offset,
+    struct v2r32 ui_group_dims,
+    struct v2r32 ui_group_scale,
+    bool is_mouse_lbutton_pressed
+) {
     struct v2r32 cur_p    = v2r32(self->p.x * ui_group_scale.x + ui_group_offset.x, self->p.y * ui_group_scale.y + ui_group_offset.y);
     cur_p = clamp__v2r32(ui_group_offset, cur_p, v2r32(ui_group_offset.x + ui_group_dims.x, ui_group_offset.y + ui_group_dims.y));
     

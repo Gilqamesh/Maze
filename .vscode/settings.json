@@ -7,6 +7,7 @@
         "input_state.h": "c",
         "algorithm": "c",
         "vector": "c",
+<<<<<<< HEAD
 <<<<<<< Updated upstream
         "xstring": "c"
 =======
@@ -18,5 +19,11 @@
         "audio_callback.h": "c",
         "mmreg.h": "c"
 >>>>>>> Stashed changes
+=======
+        "xstring": "c",
+        "xaudio2.h": "c",
+        "riff_loader.h": "c",
+        "wav_loader.h": "c"
+>>>>>>> b4525ede878d8dd81f1598897960cc095e29bf62
     }
 }

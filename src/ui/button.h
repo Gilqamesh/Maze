@@ -16,10 +16,25 @@ struct button {
     bool           is_hovered;
 };
 
-DLLEXPORT void button__create(struct button* self, struct v2r32 p, struct v2r32 dims, enum color color_passive, enum color color_hovered, enum color color_active);
+DLLEXPORT void button__create(
+    struct button* self,
+    struct v2r32 p,
+    struct v2r32 dims,
+    enum color color_passive,
+    enum color color_hovered,
+    enum color color_active
+);
 DLLEXPORT void button__destroy(struct button* self);
 
 DLLEXPORT enum color button__get_color(struct button* self);
 DLLEXPORT bool button__is_pressed(struct button* self);
 
-DLLEXPORT void button__update_and_render(struct button* self, struct window* window, struct v2u32 mp, struct v2r32 ui_group_offset, struct v2r32 ui_group_dims, struct v2r32 ui_group_scale, bool is_mouse_lbutton_pressed);
+DLLEXPORT void button__update_and_render(
+    struct button* self,
+    struct window* window,
+    struct v2i32 mp,
+    struct v2r32 ui_group_offset,
+    struct v2r32 ui_group_dims,
+    struct v2r32 ui_group_scale,
+    bool is_mouse_lbutton_pressed
+);

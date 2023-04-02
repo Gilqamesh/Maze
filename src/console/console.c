@@ -78,5 +78,5 @@ void console__fatal(struct console* self, char *error_msg, ...)
 
     console__deinit_module(self);
 
-    ExitProcess(EXIT_FAILURE);
+    ExitProcess(APP_CONSOLE_FATAL);
 }

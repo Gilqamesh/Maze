@@ -2,7 +2,7 @@
 #include "console/console.h"
 #include "window/window.h"
 #include "maze.h"
-#include "readers/bmp_loader.h"
+#include "reader/bmp_loader.h"
 #include "ui/ui_group.h"
 
 static void maze__render(struct maze* self, struct window* window, struct ui_group* render_context_holder, struct box* render_context) {
